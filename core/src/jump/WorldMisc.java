@@ -1,0 +1,136 @@
+package jump;
+
+import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.physics.box2d.*;
+import jump.userdata.BotUserData;
+import jump.userdata.GoalUserData;
+import jump.userdata.HeroUserData;
+import jump.userdata.PlatformUserData;
+
+public class WorldMisc {
+
+    static final float heroHeight = 0.8f;
+    static final float heroWidth = 0.4f;
+
+    public  World createWorld() {
+
+        return new World(new Vector2(0, -10), true);
+    }
+
+    public static Body createGoal(World world) {
+
+        BodyDef goal = new BodyDef();
+        goal.type = BodyDef.BodyType.StaticBody;
+        goal.position.set(new Vector2(70F, 30F));
+        Body body = world.createBody(goal);
+        PolygonShape goalShape = new PolygonShape();
+        goalShape.setAsBox(8F, 2.0F); //16.01F, 2.0F default
+
+       /* //give the body gravity, also needs dynamicBody
+        FixtureDef groundFixture = new FixtureDef();
+        groundFixture.density = 0.5F;
+        groundFixture.shape = goalShape;
+        groundFixture.friction = 0.0F;
+        body.createFixture(groundFixture);
+        body.setGravityScale(0.01F);
+        body.resetMassData();*/
+
+        body.createFixture(goalShape, 0.5F);
+        body.setUserData(new GoalUserData(2*(8F), 4.0F));
+        goalShape.dispose();
+        return body;
+
+    }
+
+    public static Body createPlatform(World world, Vector2 pos, float hx, float hy) {
+
+        BodyDef platform = new BodyDef();
+        platform.type = BodyDef.BodyType.StaticBody;
+        platform.position.set(pos);
+        Body body = world.createBody(platform);
+        PolygonShape platformShape = new PolygonShape();
+        platformShape.setAsBox(hx, hy);
+
+       /* //give the body gravity, also needs dynamicBody
+        FixtureDef groundFixture = new FixtureDef();
+        groundFixture.density = 0.5F;
+        groundFixture.shape = groundShape;
+        groundFixture.friction = 0.0F;
+        body.createFixture(groundFixture);
+        body.setGravityScale(0.01F);
+        body.resetMassData();*/
+
+        body.createFixture(platformShape, 0F);
+        body.setUserData(new PlatformUserData(2*hx, 2*hy));
+        platformShape.dispose();
+        return body;
+
+    }
+
+    public static Body createHero(World world, Vector2 pos, int botNumber) {
+
+        BodyDef hero = new BodyDef();
+        hero.type = BodyDef.BodyType.DynamicBody;
+        hero.position.set(pos); // new Vector2(8F, 5F) default
+        hero.fixedRotation = true;
+        PolygonShape heroShape = new PolygonShape();
+        heroShape.setAsBox(heroWidth, heroHeight);
+        Body body = world.createBody(hero);
+        FixtureDef heroFixture = new FixtureDef();
+        heroFixture.density = 0.5F;
+        heroFixture.shape = heroShape;
+        heroFixture.friction = 0.0F;
+        heroFixture.filter.groupIndex = -1; //keine kollision zwischen heroes
+        body.createFixture(heroFixture);
+
+        PolygonShape footSensor = new PolygonShape();
+        footSensor.setAsBox(heroWidth - 0.1f, 0.1F, new Vector2(0,-heroHeight), 0);
+        FixtureDef footSensorFixture = new FixtureDef();
+        footSensorFixture.density = 0F;
+        footSensorFixture.shape = footSensor;
+        footSensorFixture.friction = 0.0F;
+        footSensorFixture.isSensor = true;
+        footSensorFixture.filter.groupIndex = -1;
+        body.createFixture(footSensorFixture);
+
+        body.setGravityScale(5F);
+        body.resetMassData();
+        if (botNumber < 0){
+            body.setUserData(new HeroUserData(2*heroWidth, 2*heroHeight));
+        } else {
+            body.setUserData(new BotUserData(2*heroWidth, 2*heroHeight, botNumber));
+        }
+        heroShape.dispose();
+        return body;
+    }
+
+    /*public Body createLeftWall(World world) {
+
+        BodyDef leftWall = new BodyDef();
+        leftWall.type = BodyDef.BodyType.StaticBody;
+        leftWall.position.set(new Vector2(-1.0F, 12.0F));
+        Body body = world.createBody(leftWall);
+        PolygonShape leftWallShape = new PolygonShape();
+        leftWallShape.setAsBox(1.0F, 11.0F);
+        body.createFixture(leftWallShape, 0.5F);
+        body.setUserData(new LeftWallUserData(2.0F, 22.0F));
+        leftWallShape.dispose();
+        return body;
+
+    }
+
+    public Body createRightWall(World world) {
+
+        BodyDef rightWall = new BodyDef();
+        rightWall.type = BodyDef.BodyType.StaticBody;
+        rightWall.position.set(new Vector2(17F, 12.0F));
+        Body body = world.createBody(rightWall);
+        PolygonShape rightWallShape = new PolygonShape();
+        rightWallShape.setAsBox(0.999F, 11.0F);
+        body.createFixture(rightWallShape, 0.5F);
+        body.setUserData(new RightWallUserData(1.998F, 22.0F));
+        rightWallShape.dispose();
+        return body;
+
+    }*/
+}
