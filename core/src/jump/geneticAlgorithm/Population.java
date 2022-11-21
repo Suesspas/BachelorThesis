@@ -23,7 +23,7 @@ public class Population {
 		List<Genotype> nextGeneration = new ArrayList<Genotype>();
 		int eliteCount = Math.round(elitism*this.genomes.size());
 		for (int i = 0; i < eliteCount; i++) {
-			nextGeneration.add(new Genotype(this.genomes.get(i)));
+			nextGeneration.add(new Genotype(this.genomes.get(i),nextGeneration.size()+1));
 		}
 		int randomCount = Math.round(randomness*this.genomes.size());
 		for (int i = 0; i < randomCount; i++) {
@@ -31,7 +31,7 @@ public class Population {
 			for (int j = 1; j < net.weights.size(); j++) {
 				net.weights.set(j, (float) (Math.random()*2 - 1));
 			}
-			nextGeneration.add(new Genotype(net));
+			nextGeneration.add(new Genotype(net, nextGeneration.size()+1)); //TODO new BotActor(WorldMisc.createHero(world, new Vector2(8f, 5f), i)
 		}
 		// Pool selection
 		int max = 0;
@@ -39,6 +39,7 @@ public class Population {
 			for (int i = 0; i < max; i++) { //strenge eltern auswahl, keine Wahrscheinlichkeiten für crossover sondern reihenfolge der fitness
 				List<Genotype> children = Genotype.breed(this.genomes.get(i), this.genomes.get(max), childCount, mutationRate, mutationStdDev);
 				for (Genotype child: children) {
+					child.setNumber(nextGeneration.size()+1);
 					nextGeneration.add(child);
 					if (nextGeneration.size() >= this.genomes.size()) {
 						this.genomes = nextGeneration;

@@ -11,7 +11,10 @@ import jump.actors.GoalActor;
 import jump.actors.HeroActor;
 import jump.actors.PlatformActor;
 import jump.geneticAlgorithm.GeneticAlgorithm;
+import jump.userdata.BotUserData;
+import jump.userdata.GoalUserData;
 import jump.userdata.HeroUserData;
+import jump.userdata.PlatformUserData;
 
 public class GameStage extends Stage implements ContactListener {
 
@@ -19,7 +22,7 @@ public class GameStage extends Stage implements ContactListener {
     private Box2DDebugRenderer renderer;
     //private B2dModel b2dModel;
     GeneticAlgorithm geneticAlgorithm;
-    private World world;
+    private static World world;
     private WorldMisc wrl;
     private GoalActor Goal;
     private PlatformActor[] platforms;
@@ -63,7 +66,7 @@ public class GameStage extends Stage implements ContactListener {
     }
 
     private void setupGoal(){
-        Goal = new GoalActor(WorldMisc.createGoal(world));
+        Goal = new GoalActor(WorldMisc.createGoal());
         addActor(Goal);
     }
 
@@ -74,23 +77,25 @@ public class GameStage extends Stage implements ContactListener {
         for (int i = 0; i < platforms.length; i++){
             x = 8.0F + 15*i;
             y = 0.0F + 7*i;
-            platforms[i] = new PlatformActor(WorldMisc.createPlatform(world, new Vector2(x, y), 5.0F, 1.0F)); //new Vector2(0.0F, 0.0F, 16.01F, 2.0F) DEFAULT
+            platforms[i] = new PlatformActor(WorldMisc.createPlatform(new Vector2(x, y), 5.0F, 1.0F)); //new Vector2(0.0F, 0.0F, 16.01F, 2.0F) DEFAULT
             platforms[i].setPosition(x, y);
             System.out.println("Platform " + i + " x " + platforms[i].getX() + ", y " + platforms[i].getY() + " EXPECTED x " + x + ", y " + y);
         }
     }
 
     private void setupHero() {
-        player = new HeroActor(WorldMisc.createHero(world, new Vector2(8F, 5F), -1));
+        player = new HeroActor(WorldMisc.createHero(new Vector2(8F, 5F), -1));
         addActor(player);
     }
 
     private void setupBots() {
         bots = new BotActor[100]; //mehr als 100 bots ruckelt bzw crashed
         for (int i = 0; i < bots.length; i++){
-            bots[i] = new BotActor(WorldMisc.createHero(world, new Vector2(8f, 5f), i));
+            bots[i] = new BotActor(WorldMisc.createHero(new Vector2(8f, 5f), i));
 
             addActor(bots[i]);
+            int test = 42;
+
         }
     }
 
@@ -246,5 +251,133 @@ public class GameStage extends Stage implements ContactListener {
     @Override
     public void postSolve(Contact contact, ContactImpulse impulse) {
 
+    }
+
+    public static class WorldMisc {
+
+        static final float heroHeight = 0.8f;
+        static final float heroWidth = 0.4f;
+
+        public  World createWorld() {
+
+            return new World(new Vector2(0, -10), true);
+        }
+
+        public static Body createGoal() {
+
+            BodyDef goal = new BodyDef();
+            goal.type = BodyDef.BodyType.StaticBody;
+            goal.position.set(new Vector2(70F, 30F));
+            Body body = world.createBody(goal);
+            PolygonShape goalShape = new PolygonShape();
+            goalShape.setAsBox(8F, 2.0F); //16.01F, 2.0F default
+
+           /* //give the body gravity, also needs dynamicBody
+            FixtureDef groundFixture = new FixtureDef();
+            groundFixture.density = 0.5F;
+            groundFixture.shape = goalShape;
+            groundFixture.friction = 0.0F;
+            body.createFixture(groundFixture);
+            body.setGravityScale(0.01F);
+            body.resetMassData();*/
+
+            body.createFixture(goalShape, 0.5F);
+            body.setUserData(new GoalUserData(2*(8F), 4.0F));
+            goalShape.dispose();
+            return body;
+
+        }
+
+        public static Body createPlatform(Vector2 pos, float hx, float hy) {
+
+            BodyDef platform = new BodyDef();
+            platform.type = BodyDef.BodyType.StaticBody;
+            platform.position.set(pos);
+            Body body = world.createBody(platform);
+            PolygonShape platformShape = new PolygonShape();
+            platformShape.setAsBox(hx, hy);
+
+           /* //give the body gravity, also needs dynamicBody
+            FixtureDef groundFixture = new FixtureDef();
+            groundFixture.density = 0.5F;
+            groundFixture.shape = groundShape;
+            groundFixture.friction = 0.0F;
+            body.createFixture(groundFixture);
+            body.setGravityScale(0.01F);
+            body.resetMassData();*/
+
+            body.createFixture(platformShape, 0F);
+            body.setUserData(new PlatformUserData(2*hx, 2*hy));
+            platformShape.dispose();
+            return body;
+
+        }
+
+        public static Body createHero(Vector2 pos, int botNumber) {
+
+            BodyDef hero = new BodyDef();
+            hero.type = BodyDef.BodyType.DynamicBody;
+            hero.position.set(pos); // new Vector2(8F, 5F) default
+            hero.fixedRotation = true;
+            PolygonShape heroShape = new PolygonShape();
+            heroShape.setAsBox(heroWidth, heroHeight);
+            Body body = world.createBody(hero);
+            FixtureDef heroFixture = new FixtureDef();
+            heroFixture.density = 0.5F;
+            heroFixture.shape = heroShape;
+            heroFixture.friction = 0.0F;
+            heroFixture.filter.groupIndex = -1; //keine kollision zwischen heroes
+            body.createFixture(heroFixture);
+
+            PolygonShape footSensor = new PolygonShape();
+            footSensor.setAsBox(heroWidth - 0.1f, 0.1F, new Vector2(0,-heroHeight), 0);
+            FixtureDef footSensorFixture = new FixtureDef();
+            footSensorFixture.density = 0F;
+            footSensorFixture.shape = footSensor;
+            footSensorFixture.friction = 0.0F;
+            footSensorFixture.isSensor = true;
+            footSensorFixture.filter.groupIndex = -1;
+            body.createFixture(footSensorFixture);
+
+            body.setGravityScale(5F);
+            body.resetMassData();
+            if (botNumber < 0){
+                body.setUserData(new HeroUserData(2*heroWidth, 2*heroHeight));
+            } else {
+                body.setUserData(new BotUserData(2*heroWidth, 2*heroHeight, botNumber));
+            }
+            heroShape.dispose();
+            return body;
+        }
+
+        /*public Body createLeftWall(World world) {
+
+            BodyDef leftWall = new BodyDef();
+            leftWall.type = BodyDef.BodyType.StaticBody;
+            leftWall.position.set(new Vector2(-1.0F, 12.0F));
+            Body body = world.createBody(leftWall);
+            PolygonShape leftWallShape = new PolygonShape();
+            leftWallShape.setAsBox(1.0F, 11.0F);
+            body.createFixture(leftWallShape, 0.5F);
+            body.setUserData(new LeftWallUserData(2.0F, 22.0F));
+            leftWallShape.dispose();
+            return body;
+
+        }
+
+        public Body createRightWall(World world) {
+
+            BodyDef rightWall = new BodyDef();
+            rightWall.type = BodyDef.BodyType.StaticBody;
+            rightWall.position.set(new Vector2(17F, 12.0F));
+            Body body = world.createBody(rightWall);
+            PolygonShape rightWallShape = new PolygonShape();
+            rightWallShape.setAsBox(0.999F, 11.0F);
+            body.createFixture(rightWallShape, 0.5F);
+            body.setUserData(new RightWallUserData(1.998F, 22.0F));
+            rightWallShape.dispose();
+            return body;
+
+        }*/
     }
 }
