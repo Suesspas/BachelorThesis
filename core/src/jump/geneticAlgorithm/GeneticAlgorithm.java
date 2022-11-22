@@ -1,22 +1,14 @@
 package jump.geneticAlgorithm;
 
+import jump.GameStage;
 import jump.actors.BotActor;
+import jump.actors.GoalActor;
 import jump.actors.PlatformActor;
 import jump.neuralNetwork.NeuralNetwork;
 
 import java.util.List;
 
 public class GeneticAlgorithm {
-	
-	public class PlatformInfo {
-		public float distance;
-		public PlatformActor closestPlatform;
-		
-		public PlatformInfo(float distance, PlatformActor closestPlatform) {
-			this.distance = distance;
-			this.closestPlatform = closestPlatform;
-		}
-	}
 
 	public Population population;
 	public int alive;
@@ -30,28 +22,27 @@ public class GeneticAlgorithm {
 	public int childCount = 1;
 	
 	private NeuralNetwork bestGenome;
-	private PlatformInfo closestPlatformInfo;
 
 	//TODO was ist mit bias? wo wird er eingebaut und ist er nötig?
 
-	public GeneticAlgorithm(BotActor[] bots) {
+	public GeneticAlgorithm(List<BotActor> bots) {
 		this.population = new Population(bots);
 		//this.bestGenome = this.population.genomes.get(0).bird.net;
-		this.alive = bots.length;
+		this.alive = bots.size();
 		this.generation = 1;
 	}
 	
-	public void updatePopulation(List<PlatformActor> platforms) {
+	public void updatePopulation(PlatformActor[] platforms, GoalActor goal) {
 		for (Genotype genome: this.population.genomes) {
 			BotActor bot = genome.getBot();
-			getClosestPlatform(platforms, bot);
 			if (bot.isAlive()) {
-				bot.feed(this.closestPlatformInfo.closestPlatform, this.closestPlatformInfo.distance);
-				bot.update();
-//				if (WHENBOTISDEAD) { //TODO
-//					bot.dead();
-//					this.alive--;
-//				}
+				PlatformActor closestPlatform = getClosestPlatform(platforms, bot);
+				bot.feed(closestPlatform, bot.distanceTo(closestPlatform.getPosition()));
+				bot.update(goal);
+				if (bot.isOutOfBounds(GameStage.minWorldWidth, GameStage.minWorldHeight)) { //TODO
+					bot.dead();
+					this.alive--;
+				}
 			}
 		}
 	}
@@ -67,14 +58,10 @@ public class GeneticAlgorithm {
 		return this.bestGenome;
 	}
 	
-	public PlatformInfo getClosestPlatformInfo() {
-		return this.closestPlatformInfo;
-	}
-	
-	public int getBestScore() {
-		int best = 0;
+	public float getBestScore() {
+		float best = 0;
 		for (Genotype genome: this.population.genomes) {
-			int score = genome.getBot().getScore();
+			float score = genome.getBot().getScore();
 			if (score > best) {
 				best = score;
 			}
@@ -90,17 +77,17 @@ public class GeneticAlgorithm {
 		}
 		return true;
 	}
-	
-	private void getClosestPlatform(List<PlatformActor> platforms, BotActor bot) {
+
+	private PlatformActor getClosestPlatform(PlatformActor[] platforms, BotActor bot) {
 		PlatformActor closestPlatform = null;
 		float distance = Float.MAX_VALUE;
 		for (PlatformActor platform: platforms) {
-			float test = platform.getX() + platform.getWidth()/2 - platform.getX(); //TODO y coords
-			if (Math.abs(test) < Math.abs(distance)) {
+			float test = bot.distanceTo(platform.getPosition());
+			if (test < distance) {
 				distance = test;
 				closestPlatform = platform;
 			}
 		}
-		this.closestPlatformInfo = new PlatformInfo(distance, closestPlatform);
+		return closestPlatform;
 	}
 }

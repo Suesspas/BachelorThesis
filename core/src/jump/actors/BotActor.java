@@ -11,7 +11,7 @@ public class BotActor extends HeroActor{
     private int jumpTimer;
 
     private boolean isAlive;
-    private int score;
+    private float score;
     private static final Vector2 spawn = new Vector2(8f,5f);
 
 
@@ -32,11 +32,15 @@ public class BotActor extends HeroActor{
         score = 0;
     }
 
-    public void update() {
-        this.score++;
+    public void update(GoalActor goal) { //TODO
+        this.score = Math.max(this.score, 1/(1 + distanceTo(goal.body.getPosition())));
     }
 
-    public int getScore() {
+    public float distanceTo(Vector2 target){
+        return target.dst(this.body.getPosition());
+    }
+
+    public float getScore() {
         return score;
     }
 
@@ -45,16 +49,26 @@ public class BotActor extends HeroActor{
     }
 
     public void feed(PlatformActor closestPlatform, float distance) { //TODO dist y values
-//        if (closestPlatform != null && isAlive) {
-//            float[] inputs = {
-//                    distance / Screen.WIDTH,
-//                    (this.y + this.radius - (Screen.HEIGHT - closestPlatform.height)) / Screen.HEIGHT,
-//                    ((Screen.HEIGHT - closestPlatform.gap - closestPlatform.height) - this.y - this.radius) / Screen.HEIGHT,
-//            };
-//            float[] output = this.net.eval(inputs);
-//            if (output[0] > output[1])
-//                this.flap();
-//        }
+        if (closestPlatform != null && isAlive) {
+
+            float[] inputs = {
+                    distance / GameStage.minWorldWidth,
+                    this.body.getPosition().x,
+                    this.body.getPosition().y,
+            };
+
+            float[] output = this.getNeuralNetwork().eval(inputs); //TODO outputs in what range? between 0-1?
+            if (output[0] > 0.5 && output[0] > output[1]){
+                this.moveRight();
+            } else if (output[1] > 0.5 && output[1] > output[0]){
+                this.moveLeft();
+            } else {
+                this.moveStop();
+            }
+            if (output[2]> 0.5)
+                this.jump();
+
+        }
     }
 
     @Override
@@ -84,7 +98,16 @@ public class BotActor extends HeroActor{
         jumpTimer = 2;
     }
 
-    public void setNumber(int botNumber) {
+    public void setNumber(int botNumber) { //TODO whack
         body = GameStage.WorldMisc.createHero(spawn, botNumber);
+    }
+
+    public Body getBody(){
+        return this.body;
+    }
+
+    public boolean isOutOfBounds(float x, float y){
+        return (this.body.getPosition().x > x) || (this.body.getPosition().x < 0)
+                || (this.body.getPosition().y > y) || (this.body.getPosition().y < 0);
     }
 }

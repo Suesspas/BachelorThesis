@@ -47,4 +47,8 @@ public class HeroUserData extends UserData {
     public int getBotNumber() {
         return botNumber;
     }
+
+    public void setBotNumber(int botNumber) {
+        this.botNumber = botNumber;
+    }
 }
