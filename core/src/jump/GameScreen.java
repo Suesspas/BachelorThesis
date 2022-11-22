@@ -8,6 +8,8 @@ import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
 import com.badlogic.gdx.utils.Array;
@@ -28,6 +30,8 @@ public class GameScreen implements Screen {
     Box2DDebugRenderer debugRenderer;
     //B2dModel model;
     private GameStage gameStage;
+    BitmapFont font = new BitmapFont();
+    SpriteBatch batch = new SpriteBatch();
 
 
     public GameScreen(final Jump gam) {
@@ -48,8 +52,9 @@ public class GameScreen implements Screen {
         rainMusic.setLooping(true);*/
 
         // create the camera and the SpriteBatch
-        //camera = new OrthographicCamera(32,24);
-        //camera.setToOrtho(false, 32, 24);
+        camera = new OrthographicCamera(gameStage.getWidth(), gameStage.getHeight());
+        camera.setToOrtho(false, gameStage.getWidth(), gameStage.getHeight());
+        //font.getData().scale(0.01f);
         //debugRenderer = new Box2DDebugRenderer(true,true,true,true,true,true);
 
        /* // create a Rectangle to logically represent the bucket
@@ -77,7 +82,15 @@ public class GameScreen implements Screen {
         gameStage.right = Gdx.input.isKeyPressed(Keys.RIGHT);
         gameStage.jump = Gdx.input.isKeyPressed(Keys.UP);
 
-        // camera.update();
+//        batch.setProjectionMatrix(camera.combined); //or your matrix to draw GAME WORLD, not UI
+//
+//        batch.begin();
+//
+//        font.draw(batch, "1", 1, gameStage.getHeight()-3);
+//
+//
+//        batch.end();
+//        camera.update();
 
         /*model.logicStep(delta);
         Gdx.gl.glClearColor(0f, 0f, 0f, 1);

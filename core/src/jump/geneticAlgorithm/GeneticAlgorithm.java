@@ -6,6 +6,7 @@ import jump.actors.GoalActor;
 import jump.actors.PlatformActor;
 import jump.neuralNetwork.NeuralNetwork;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class GeneticAlgorithm {
@@ -26,6 +27,17 @@ public class GeneticAlgorithm {
 	//TODO was ist mit bias? wo wird er eingebaut und ist er nötig?
 
 	public GeneticAlgorithm(List<BotActor> bots) {
+		this.population = new Population(bots);
+		//this.bestGenome = this.population.genomes.get(0).bird.net;
+		this.alive = bots.size();
+		this.generation = 1;
+	}
+
+	public GeneticAlgorithm() {
+		List<BotActor> bots = new ArrayList<>();
+		for (int i = 0; i < populationSize; i++){
+			bots.add(new BotActor(i));
+		}
 		this.population = new Population(bots);
 		//this.bestGenome = this.population.genomes.get(0).bird.net;
 		this.alive = bots.size();

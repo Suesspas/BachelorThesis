@@ -1,6 +1,10 @@
 package jump;
 
+import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.physics.box2d.*;
@@ -38,13 +42,14 @@ public class GameStage extends Stage implements ContactListener {
     public Boolean right = false, left = false, jump = false;
     int playerJumpTimer;
 
-    private OrthographicCamera camera;
+    private Camera camera;
     public Vector3 posCameraDesired;
 
-    final int botnumber = 100;
+    SpriteBatch batch = new SpriteBatch();
+    BitmapFont font = new BitmapFont();
 
-    public static final float minWorldWidth = 80f;
-    public static final float minWorldHeight = 45f;
+    public static final float minWorldWidth = 320f; //def 80f
+    public static final float minWorldHeight = 180f; //def 45f
 
     public GameStage(){
         super(new ExtendViewport(minWorldWidth, minWorldHeight, new OrthographicCamera(16f, 9f)));
@@ -53,11 +58,19 @@ public class GameStage extends Stage implements ContactListener {
 
         playerJumpTimer = 0;
 
-        //camera = new OrthographicCamera(16f, 9f);
+        font.getRegion().getTexture().setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear); //blurry text, instead of weird pixels
+        font.getData().setScale(0.5f);
 
         setupWorld();
 
-        geneticAlgorithm = new GeneticAlgorithm(bots);
+        geneticAlgorithm = new GeneticAlgorithm();
+
+        bots = new ArrayList<>();
+        for (Genotype genome: geneticAlgorithm.population.genomes) {
+            bots.add(genome.getBot());
+        }
+
+        camera = getViewport().getCamera();
     }
 
     private void setupWorld() {
@@ -69,7 +82,7 @@ public class GameStage extends Stage implements ContactListener {
         setupGoal();
         setupPlatforms();
         setupHero();
-        setupBots();
+        //setupBots();
         /*setupLeftWall();
         setupRightWall();*/
 
@@ -89,7 +102,7 @@ public class GameStage extends Stage implements ContactListener {
             y = 0.0F + 7*i;
             platforms[i] = new PlatformActor(WorldMisc.createPlatform(new Vector2(x, y), 5.0F, 1.0F)); //new Vector2(0.0F, 0.0F, 16.01F, 2.0F) DEFAULT
             platforms[i].setPosition(x, y);
-            System.out.println("Platform " + i + " x " + platforms[i].getX() + ", y " + platforms[i].getY() + " EXPECTED x " + x + ", y " + y);
+            //System.out.println("Platform " + i + " x " + platforms[i].getX() + ", y " + platforms[i].getY() + " EXPECTED x " + x + ", y " + y);
         }
     }
 
@@ -98,15 +111,15 @@ public class GameStage extends Stage implements ContactListener {
         addActor(player);
     }
 
-    private void setupBots() {
-        bots = new ArrayList<BotActor>(); //mehr als 100 bots ruckelt bzw crashed
-        BotActor bot;
-        for (int i = 0; i < botnumber; i++){
-            bot = new BotActor(WorldMisc.createHero(new Vector2(8f, 5f), i));
-            bots.add(bot);
-            addActor(bot); //TODO add actor when new generation
-        }
-    }
+//    private void setupBots() {
+//        bots = new ArrayList<BotActor>(); //mehr als 100 bots ruckelt bzw crashed
+//        BotActor bot;
+//        for (int i = 0; i < botnumber; i++){
+//            bot = new BotActor(i);
+//            bots.add(bot);
+//            addActor(bot); //TODO add actor when new generation
+//        }
+//    }
 
     /*private void setupLeftWall(){
         leftWall = wrl.createLeftWall(world);
@@ -156,8 +169,6 @@ public class GameStage extends Stage implements ContactListener {
             b.decrementJumpTimer();
             if(!b.isAlive()){
                 deadBots.add(b);
-                //bots.remove(b);
-                System.out.println("dead, score " + b.getScore());
             }
         }
         //remove dead bots
@@ -175,9 +186,6 @@ public class GameStage extends Stage implements ContactListener {
             }
         }
 
-        if (count % 10 == 0){
-            System.out.println(count);
-        }
 
         if (geneticAlgorithm.populationDead() || count % 500 == 499) {
             for (BotActor b: bots) {
@@ -201,9 +209,9 @@ public class GameStage extends Stage implements ContactListener {
             if (count > 70){
                 if (Math.random() > 0.5){
                     b.jump();
-                    System.out.println(b.getBody().getPosition() + ", OOB? " + b.isOutOfBounds(minWorldWidth, minWorldHeight));
-                    System.out.println(b.getBody().getPosition() + ", score " + b.getScore());//TODO test world coords vs screen coords
-                    System.out.println("BEST score " + geneticAlgorithm.getBestScore());
+//                    System.out.println(b.getBody().getPosition() + ", OOB? " + b.isOutOfBounds(minWorldWidth, minWorldHeight));
+//                    System.out.println(b.getBody().getPosition() + ", score " + b.getScore());
+//                    System.out.println("BEST score " + geneticAlgorithm.getBestScore());
                     count = 0;
                 }
             }
@@ -211,11 +219,28 @@ public class GameStage extends Stage implements ContactListener {
 
     }
 
+
     @Override
     public void draw() {
 
         super.draw();
-        renderer.render(world, getViewport().getCamera().combined);
+        renderer.render(world, camera.combined);
+
+        batch.setProjectionMatrix(camera.combined);
+        String generationStr = "Generation " + geneticAlgorithm.generation;
+        String topScoreStr = "Top score: " + geneticAlgorithm.getBestScore();
+        String botsAliveStr = "Bots alive: "+ bots.size();
+
+        batch.begin();
+
+        font.draw(batch, String.valueOf(count), 1, getHeight()-3);
+        font.draw(batch, generationStr, 100, getHeight()-3);
+        font.draw(batch, botsAliveStr, 200, getHeight()-3);
+        font.draw(batch, topScoreStr, 1, getHeight()-20);
+
+        batch.end();
+
+        //camera.update();
         //processCameraMovement();
         //camera.position.lerp(posCameraDesired,0.1f);//vector of the camera desired position and smoothness of the movement
 
@@ -231,13 +256,7 @@ public class GameStage extends Stage implements ContactListener {
     }
 
     private void reset() {
-//        pipes.clear();
-//        initPipes();
-//        frameCount = 0;
-//        tickCounter = 0;
-//        score = 0;
-        geneticAlgorithm.evolvePopulation();
-        System.out.println("EVOLVED");
+        geneticAlgorithm.evolvePopulation(); //TODO test
         List<Genotype> genomes = geneticAlgorithm.population.genomes;
         for (int i = 0; i < genomes.size(); i++) {
             BotActor bot = geneticAlgorithm.population.genomes.get(i).getBot();
@@ -270,16 +289,20 @@ public class GameStage extends Stage implements ContactListener {
         } else if (b.isSensor() && !BodyMisc.bodyIsHero(bodyA)) {
             landed(bodyB);
         }
-
-        if ((a.isSensor() && BodyMisc.bodyIsGoal(b.getBody())) || (b.isSensor() && BodyMisc.bodyIsGoal(a.getBody()))){
-            //level clear
-            System.out.println("Level clear");
+        //Bot reaches goal
+        if ((a.isSensor() && BodyMisc.bodyIsGoal(b.getBody()))){
+            BotActor bot = bots.get(getBotNumber(bodyA));
+            bot.reachedGoal();
+            bot.update(goal);
+        } else if (b.isSensor() && BodyMisc.bodyIsGoal(a.getBody())){
+            BotActor bot = bots.get(getBotNumber(bodyB));
+            bot.reachedGoal();
+            bot.update(goal);
         }
     }
 
     private void landed(Body bodyA) {
-        HeroUserData userDataA = (HeroUserData) bodyA.getUserData();
-        int botNumber = userDataA.getBotNumber();
+        int botNumber = getBotNumber(bodyA);
         if (botNumber < 0){
             player.landed();
             playerJumpTimer = 2;
@@ -287,6 +310,11 @@ public class GameStage extends Stage implements ContactListener {
             bots.get(botNumber).landed();
             //System.out.println("bot " + botNumber + " landed");
         }
+    }
+
+    private static int getBotNumber(Body bodyA) {
+        HeroUserData userDataA = (HeroUserData) bodyA.getUserData();
+        return userDataA.getBotNumber();
     }
 
     @Override

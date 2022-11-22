@@ -2,7 +2,6 @@ package jump.actors;
 
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
-import jump.Bot;
 import jump.GameStage;
 import jump.neuralNetwork.NeuralNetwork;
 
@@ -12,15 +11,18 @@ public class BotActor extends HeroActor{
 
     private boolean isAlive;
     private float score;
+
+    private boolean reachedGoal;
     private static final Vector2 spawn = new Vector2(8f,5f);
 
 
 
-    public BotActor(Body body) {
-        super(body);
+    public BotActor(int botNumber) {
+        super(GameStage.WorldMisc.createHero(spawn, botNumber));
         neuralNetwork = new NeuralNetwork(3,3,3); //TODO figure out topology
         jumpTimer = 0;
         isAlive = true;
+        reachedGoal = false;
         score = 0;
     }
 
@@ -29,11 +31,16 @@ public class BotActor extends HeroActor{
         neuralNetwork = NeuralNetwork.expand(net);
         jumpTimer = 0;
         isAlive = true;
+        reachedGoal = false;
         score = 0;
     }
 
     public void update(GoalActor goal) { //TODO
-        this.score = Math.max(this.score, 1/(1 + distanceTo(goal.body.getPosition())));
+        this.score = Math.max(this.score, scoreCalc(goal));
+    }
+
+    private float scoreCalc(GoalActor goal) {
+        return (reachedGoal ? 1000 : 100) / (1 + distanceTo(goal.body.getPosition()));
     }
 
     public float distanceTo(Vector2 target){
@@ -109,5 +116,9 @@ public class BotActor extends HeroActor{
     public boolean isOutOfBounds(float x, float y){
         return (this.body.getPosition().x > x) || (this.body.getPosition().x < 0)
                 || (this.body.getPosition().y > y) || (this.body.getPosition().y < 0);
+    }
+
+    public void reachedGoal() {
+        reachedGoal = true;
     }
 }
