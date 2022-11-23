@@ -22,7 +22,6 @@ import jump.userdata.HeroUserData;
 import jump.userdata.PlatformUserData;
 
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 
 public class GameStage extends Stage implements ContactListener {
@@ -34,7 +33,7 @@ public class GameStage extends Stage implements ContactListener {
     private static World world;
     private WorldMisc wrl;
     private GoalActor goal;
-    private PlatformActor[] platforms;
+    private List<PlatformActor> platforms;
     /*private LeftWallActor leftWall;
     private RightWallActor rightWall;*/
     private HeroActor player;
@@ -48,8 +47,10 @@ public class GameStage extends Stage implements ContactListener {
     SpriteBatch batch = new SpriteBatch();
     BitmapFont font = new BitmapFont();
 
-    public static final float minWorldWidth = 320f; //def 80f
-    public static final float minWorldHeight = 180f; //def 45f
+    public static final float minWorldWidth = 160f; //def 80f
+    public static final float minWorldHeight = 90f; //def 45f
+    private static int levelTimer;
+    private static int maxLevelTimer;
 
     public GameStage(){
         super(new ExtendViewport(minWorldWidth, minWorldHeight, new OrthographicCamera(16f, 9f)));
@@ -79,30 +80,63 @@ public class GameStage extends Stage implements ContactListener {
         world = wrl.createWorld();
         renderer = new Box2DDebugRenderer(true,true,true,true,true,true);
         world.setContactListener(this);
-        setupGoal();
-        setupPlatforms();
+        setupLevel(1);
         setupHero();
-        //setupBots();
-        /*setupLeftWall();
-        setupRightWall();*/
-
     }
 
-    private void setupGoal(){
-        goal = new GoalActor(WorldMisc.createGoal());
+    private void setupLevel(int levelNumber){//TODO set up levels 2+
+        List<Vector2> platformCoords = new ArrayList<>();
+        switch (levelNumber){
+            case 1:
+                clearLevel();
+                setupGoal(70F, 30F, 8F, 2F);
+                for (int i = 0; i < 4; i++){
+                    platformCoords.add(new Vector2(8.0F + 15*i, 0.0F + 7*i));
+                }
+                setupPlatforms(platformCoords);
+                levelTimer = 0;
+                maxLevelTimer = 500;
+                break;
+            case 2:
+                clearLevel();
+                setupGoal(130F, 55F, 8F, 2F);
+                for (int i = 0; i < 8; i++){
+                    platformCoords.add(new Vector2(8.0F + 15*i, 0.0F + 7*i));
+                }
+                setupPlatforms(platformCoords);
+                levelTimer = 0;
+                maxLevelTimer = 800;
+                break;
+            case 3:
+                break;
+            case 4:
+                break;
+            case 5:
+                break;
+            default: return;
+        }
+    }
+
+    private void clearLevel(){
+        if (platforms == null) return;
+        for (PlatformActor p : platforms) {
+            world.destroyBody(p.getBody());
+        }
+        world.destroyBody(goal.getBody());
+    }
+
+    private void setupGoal(float x, float y, float hx, float hy){
+        goal = new GoalActor(WorldMisc.createGoal(new Vector2(x, y), hx, hy));
         addActor(goal);
     }
 
-    private void setupPlatforms(){
-        platforms = new PlatformActor[4];
-        float x = 0;
-        float y = 0;
-        for (int i = 0; i < platforms.length; i++){
-            x = 8.0F + 15*i;
-            y = 0.0F + 7*i;
-            platforms[i] = new PlatformActor(WorldMisc.createPlatform(new Vector2(x, y), 5.0F, 1.0F)); //new Vector2(0.0F, 0.0F, 16.01F, 2.0F) DEFAULT
-            platforms[i].setPosition(x, y);
-            //System.out.println("Platform " + i + " x " + platforms[i].getX() + ", y " + platforms[i].getY() + " EXPECTED x " + x + ", y " + y);
+    private void setupPlatforms(List<Vector2> platformCoords){//TODO make hx and hy variable
+        platforms = new ArrayList<>();
+        for (int i = 0; i < platformCoords.size(); i++){
+            PlatformActor platformActor = new PlatformActor(WorldMisc.createPlatform(platformCoords.get(i), 5.0F, 1.0F));
+            platforms.add(platformActor);
+            platforms.get(i).setPosition(platformCoords.get(i).x, platformCoords.get(i).y);
+            addActor(platformActor);
         }
     }
 
@@ -129,8 +163,6 @@ public class GameStage extends Stage implements ContactListener {
         rightWall = wrl.createRightWall(world);
     }*/
 
-
-    static int count = 60; //test
     @Override
     public void act(float delta) {
 
@@ -159,7 +191,6 @@ public class GameStage extends Stage implements ContactListener {
         }
         playerJumpTimer--;
 
-        //botMovement();
         geneticAlgorithm.updatePopulation(platforms, goal);
 
         List<BotActor> deadBots = new ArrayList<>();
@@ -187,38 +218,14 @@ public class GameStage extends Stage implements ContactListener {
         }
 
 
-        if (geneticAlgorithm.populationDead() || count % 500 == 499) {
+        if (geneticAlgorithm.populationDead() || levelTimer % maxLevelTimer == maxLevelTimer-1) {//TODO change countdown timer for different levels
             for (BotActor b: bots) {
                     world.destroyBody(b.getBody());
             }
             reset();
         }
-        count++;
+        levelTimer++;
     }
-
-    private void botMovement() {
-        for (BotActor b: bots) {
-            b.update(goal);
-
-            if (b.getUserData().getBotNumber() == 1) {
-                //b.moveLeft();
-            } else {
-                b.moveRight();
-            }
-            count++;
-            if (count > 70){
-                if (Math.random() > 0.5){
-                    b.jump();
-//                    System.out.println(b.getBody().getPosition() + ", OOB? " + b.isOutOfBounds(minWorldWidth, minWorldHeight));
-//                    System.out.println(b.getBody().getPosition() + ", score " + b.getScore());
-//                    System.out.println("BEST score " + geneticAlgorithm.getBestScore());
-                    count = 0;
-                }
-            }
-        }
-
-    }
-
 
     @Override
     public void draw() {
@@ -233,9 +240,9 @@ public class GameStage extends Stage implements ContactListener {
 
         batch.begin();
 
-        font.draw(batch, String.valueOf(count), 1, getHeight()-3);
-        font.draw(batch, generationStr, 100, getHeight()-3);
-        font.draw(batch, botsAliveStr, 200, getHeight()-3);
+        font.draw(batch, String.valueOf(levelTimer), 1, getHeight()-3);
+        font.draw(batch, generationStr, getWidth()/3, getHeight()-3);
+        font.draw(batch, botsAliveStr, 2*getWidth()/3, getHeight()-3);
         font.draw(batch, topScoreStr, 1, getHeight()-20);
 
         batch.end();
@@ -362,14 +369,14 @@ public class GameStage extends Stage implements ContactListener {
             return new World(new Vector2(0, -10), true);
         }
 
-        public static Body createGoal() {
+        public static Body createGoal(Vector2 pos, float hx, float hy) {
 
             BodyDef goal = new BodyDef();
             goal.type = BodyDef.BodyType.StaticBody;
-            goal.position.set(new Vector2(70F, 30F));
+            goal.position.set(pos);
             Body body = world.createBody(goal);
             PolygonShape goalShape = new PolygonShape();
-            goalShape.setAsBox(8F, 2.0F); //16.01F, 2.0F default
+            goalShape.setAsBox(hx, hy); //16.01F, 2.0F default
 
            /* //give the body gravity, also needs dynamicBody
             FixtureDef groundFixture = new FixtureDef();
@@ -381,7 +388,7 @@ public class GameStage extends Stage implements ContactListener {
             body.resetMassData();*/
 
             body.createFixture(goalShape, 0.5F);
-            body.setUserData(new GoalUserData(2*(8F), 4.0F));
+            body.setUserData(new GoalUserData(2*(hx), 2*hy));
             goalShape.dispose();
             return body;
 

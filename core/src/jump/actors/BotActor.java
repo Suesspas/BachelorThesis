@@ -5,6 +5,8 @@ import com.badlogic.gdx.physics.box2d.Body;
 import jump.GameStage;
 import jump.neuralNetwork.NeuralNetwork;
 
+import java.util.Arrays;
+
 public class BotActor extends HeroActor{
     private NeuralNetwork neuralNetwork;
     private int jumpTimer;
@@ -19,7 +21,7 @@ public class BotActor extends HeroActor{
 
     public BotActor(int botNumber) {
         super(GameStage.WorldMisc.createHero(spawn, botNumber));
-        neuralNetwork = new NeuralNetwork(3,3,3); //TODO figure out topology
+        neuralNetwork = new NeuralNetwork(6,5,3); //TODO figure out topology
         jumpTimer = 0;
         isAlive = true;
         reachedGoal = false;
@@ -27,7 +29,7 @@ public class BotActor extends HeroActor{
     }
 
     public BotActor(NeuralNetwork.FlattenNetwork net, int botNumber) {
-        super(GameStage.WorldMisc.createHero(spawn, botNumber)); //TODO
+        super(GameStage.WorldMisc.createHero(spawn, botNumber));
         neuralNetwork = NeuralNetwork.expand(net);
         jumpTimer = 0;
         isAlive = true;
@@ -35,7 +37,7 @@ public class BotActor extends HeroActor{
         score = 0;
     }
 
-    public void update(GoalActor goal) { //TODO
+    public void update(GoalActor goal) {
         this.score = Math.max(this.score, scoreCalc(goal));
     }
 
@@ -55,16 +57,22 @@ public class BotActor extends HeroActor{
         return neuralNetwork;
     }
 
-    public void feed(PlatformActor closestPlatform, float distance) { //TODO dist y values
+    public void feed(PlatformActor closestPlatform, float distanceToGoal) { //TODO sinvolle inputs
         if (closestPlatform != null && isAlive) {
 
             float[] inputs = {
-                    distance / GameStage.minWorldWidth,
+                    1f, //
+                    distanceToGoal , // alternative distance / GameStage.minWorldWidth
                     this.body.getPosition().x,
                     this.body.getPosition().y,
+                    closestPlatform.getX(),
+                    closestPlatform.getY(),
             };
 
-            float[] output = this.getNeuralNetwork().eval(inputs); //TODO outputs in what range? between 0-1?
+            float[] output = this.getNeuralNetwork().eval(inputs); //TODO outputs in what range?
+            if (this.getUserData().getBotNumber() == 1){
+                System.out.println("Bot number " + this.getUserData().getBotNumber() + " outputs: " + Arrays.toString(output));
+            }
             if (output[0] > 0.5 && output[0] > output[1]){
                 this.moveRight();
             } else if (output[1] > 0.5 && output[1] > output[0]){
@@ -107,10 +115,6 @@ public class BotActor extends HeroActor{
 
     public void setNumber(int botNumber) { //TODO whack
         body = GameStage.WorldMisc.createHero(spawn, botNumber);
-    }
-
-    public Body getBody(){
-        return this.body;
     }
 
     public boolean isOutOfBounds(float x, float y){

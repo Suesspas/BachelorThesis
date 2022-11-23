@@ -29,19 +29,17 @@ public class Genotype {
 		this.bot = bot;
 	}
 
-	public Genotype(NeuralNetwork.FlattenNetwork net, int botNumber) { //TODO
+	public Genotype(NeuralNetwork.FlattenNetwork net, int botNumber) {
 		this.bot = new BotActor(net, botNumber);
 		this.fitness = 0;
 	}
 
-	public Genotype(Genotype genome, int botNumber) { //TODO
+	public Genotype(Genotype genome, int botNumber) {
 		this.bot = new BotActor(genome.getBot().getNeuralNetwork().flatten(), botNumber);
-		//bot.setNumber(botNumber);
 		this.fitness = 0;
 	}
 
-	//TODO methodennamen und genotype male female namen ändern
-	public static List<Genotype> breed(Genotype geneA, Genotype geneB, int childCount, float mutationRate, float mutationStdDev) {
+	public static List<Genotype> crossOver(Genotype geneA, Genotype geneB, int childCount, float mutationRate, float mutationStdDev) {
 		List<Genotype> children = new ArrayList<Genotype>();
 		for (int ch = 0; ch < childCount; ch++) {
 			NeuralNetwork.FlattenNetwork childNet = geneA.bot.getNeuralNetwork().flatten();
@@ -56,7 +54,7 @@ public class Genotype {
 					childNet.weights.set(i, (float) Math.random()*2*mutationStdDev - mutationStdDev); //TODO verstehen bzw ist das richtig? sollte es nicht die existierenden werte verändern?
 				}
 			}
-			children.add(new Genotype(childNet, 0)); //TODO what number? doesnt matter tbf is set after
+			children.add(new Genotype(childNet, 0)); //default bot number 0, is set after method call
 		}
 		return children;
 	}

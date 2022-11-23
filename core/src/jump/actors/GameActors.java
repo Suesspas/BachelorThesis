@@ -19,5 +19,9 @@ public abstract class GameActors extends Actor {
         return body.getPosition();
     }
 
+    public Body getBody(){
+        return this.body;
+    }
+
     public abstract UserData getUserData();
 }

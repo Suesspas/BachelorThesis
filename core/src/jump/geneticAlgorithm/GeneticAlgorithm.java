@@ -44,14 +44,14 @@ public class GeneticAlgorithm {
 		this.generation = 1;
 	}
 	
-	public void updatePopulation(PlatformActor[] platforms, GoalActor goal) {
+	public void updatePopulation(List<PlatformActor> platforms, GoalActor goal) {
 		for (Genotype genome: this.population.genomes) {
 			BotActor bot = genome.getBot();
 			if (bot.isAlive()) {
 				PlatformActor closestPlatform = getClosestPlatform(platforms, bot);
-				bot.feed(closestPlatform, bot.distanceTo(closestPlatform.getPosition()));
+				bot.feed(closestPlatform, bot.distanceTo(goal.getPosition()));
 				bot.update(goal);
-				if (bot.isOutOfBounds(GameStage.minWorldWidth, GameStage.minWorldHeight)) { //TODO
+				if (bot.isOutOfBounds(GameStage.minWorldWidth, GameStage.minWorldHeight)) {
 					bot.dead();
 					this.alive--;
 				}
@@ -90,7 +90,7 @@ public class GeneticAlgorithm {
 		return true;
 	}
 
-	private PlatformActor getClosestPlatform(PlatformActor[] platforms, BotActor bot) {
+	private PlatformActor getClosestPlatform(List<PlatformActor> platforms, BotActor bot) {
 		PlatformActor closestPlatform = null;
 		float distance = Float.MAX_VALUE;
 		for (PlatformActor platform: platforms) {
