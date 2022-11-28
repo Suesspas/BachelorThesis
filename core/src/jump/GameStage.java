@@ -80,7 +80,7 @@ public class GameStage extends Stage implements ContactListener {
         world = wrl.createWorld();
         renderer = new Box2DDebugRenderer(true,true,true,true,true,true);
         world.setContactListener(this);
-        setupLevel(1);
+        setupLevel(3);
         setupHero();
     }
 
@@ -105,9 +105,17 @@ public class GameStage extends Stage implements ContactListener {
                 }
                 setupPlatforms(platformCoords);
                 levelTimer = 0;
-                maxLevelTimer = 800;
+                maxLevelTimer = 900;
                 break;
             case 3:
+                clearLevel();
+                setupGoal(10F, 55F, 8F, 2F);
+                for (int i = 0; i < 8; i++){
+                    platformCoords.add(new Vector2(i > 4? 68.0F - 15*(i-4) : 8.0F + 15*i, 0.0F + 7*i));
+                }
+                setupPlatforms(platformCoords);
+                levelTimer = 0;
+                maxLevelTimer = 900;
                 break;
             case 4:
                 break;
@@ -191,7 +199,7 @@ public class GameStage extends Stage implements ContactListener {
         }
         playerJumpTimer--;
 
-        geneticAlgorithm.updatePopulation(platforms, goal);
+        geneticAlgorithm.updatePopulation(platforms, goal, levelTimer);
 
         List<BotActor> deadBots = new ArrayList<>();
 
@@ -300,11 +308,11 @@ public class GameStage extends Stage implements ContactListener {
         if ((a.isSensor() && BodyMisc.bodyIsGoal(b.getBody()))){
             BotActor bot = bots.get(getBotNumber(bodyA));
             bot.reachedGoal();
-            bot.update(goal);
+            bot.update(goal, levelTimer);
         } else if (b.isSensor() && BodyMisc.bodyIsGoal(a.getBody())){
             BotActor bot = bots.get(getBotNumber(bodyB));
             bot.reachedGoal();
-            bot.update(goal);
+            bot.update(goal, levelTimer);
         }
     }
 
@@ -364,8 +372,11 @@ public class GameStage extends Stage implements ContactListener {
         static final float heroHeight = 0.8f;
         static final float heroWidth = 0.4f;
 
+        public static final float MAXDIST = new Vector2(0,0).dst(minWorldWidth,minWorldHeight);
+
         public  World createWorld() {
 
+            System.out.println(MAXDIST);
             return new World(new Vector2(0, -10), true);
         }
 

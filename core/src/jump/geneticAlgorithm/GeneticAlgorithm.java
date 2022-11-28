@@ -7,7 +7,9 @@ import jump.actors.PlatformActor;
 import jump.neuralNetwork.NeuralNetwork;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class GeneticAlgorithm {
 
@@ -44,13 +46,26 @@ public class GeneticAlgorithm {
 		this.generation = 1;
 	}
 	
-	public void updatePopulation(List<PlatformActor> platforms, GoalActor goal) {
+	public void updatePopulation(List<PlatformActor> platforms, GoalActor goal, int levelTimer) {
 		for (Genotype genome: this.population.genomes) {
 			BotActor bot = genome.getBot();
 			if (bot.isAlive()) {
 				PlatformActor closestPlatform = getClosestPlatform(platforms, bot);
-				bot.feed(closestPlatform, bot.distanceTo(goal.getPosition()));
-				bot.update(goal);
+
+				List<PlatformActor> platformsByDist = getXClosestPlatforms(3, platforms, bot); //TODO feed2, x init
+				List<Float> sortedPlatformDistances = new ArrayList<>();
+				for (PlatformActor platform : platforms) {
+					sortedPlatformDistances.add(bot.distanceTo(platform.getPosition()));
+				}
+				Collections.sort(sortedPlatformDistances);
+				if (bot.getUserData().getBotNumber() == 1){
+					System.out.println("bot 1 sorted distances" + sortedPlatformDistances);
+				}
+
+//				bot.feed(closestPlatform, bot.distanceTo(goal.getPosition()));
+				bot.feed2(sortedPlatformDistances, bot.distanceTo(goal.getPosition()));
+
+				bot.update(goal, levelTimer);
 				if (bot.isOutOfBounds(GameStage.minWorldWidth, GameStage.minWorldHeight)) {
 					bot.dead();
 					this.alive--;
@@ -58,7 +73,9 @@ public class GeneticAlgorithm {
 			}
 		}
 	}
-	
+
+
+
 	public void evolvePopulation() {
 		this.alive = this.populationSize;
 		this.generation++;
@@ -101,5 +118,21 @@ public class GeneticAlgorithm {
 			}
 		}
 		return closestPlatform;
+	}
+
+	private List<PlatformActor> getXClosestPlatforms(int x, List<PlatformActor> platforms, BotActor bot) {
+		if (x >= platforms.size()){
+			x = platforms.size();
+			System.err.println("Only " + platforms.size() + " platforms in level");
+		}
+		List<PlatformActor> tempPlats = new ArrayList<>(platforms);
+		List<PlatformActor> platformsByDist = new ArrayList<>();
+		PlatformActor tempPlat;
+		for (int i = 0; i < x; i++){
+			tempPlat = getClosestPlatform(tempPlats, bot);
+			platformsByDist.add(tempPlat);
+			tempPlats.remove(tempPlat);
+		}
+		return  platformsByDist;
 	}
 }
