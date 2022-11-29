@@ -10,5 +10,6 @@ public class BotUserData extends HeroUserData{
     public BotUserData(float width, float height, int botNumber) {
         super(width, height);
         this.botNumber = botNumber;
+        userDataType = UserDataType.BOT;
     }
 }

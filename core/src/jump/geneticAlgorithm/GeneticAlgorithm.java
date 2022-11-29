@@ -56,14 +56,15 @@ public class GeneticAlgorithm {
 				List<Float> sortedPlatformDistances = new ArrayList<>();
 				for (PlatformActor platform : platforms) {
 					sortedPlatformDistances.add(bot.distanceTo(platform.getPosition()));
+					bot.angleTo(platform.getPosition());
 				}
 				Collections.sort(sortedPlatformDistances);
-				if (bot.getUserData().getBotNumber() == 1){
-					System.out.println("bot 1 sorted distances" + sortedPlatformDistances);
-				}
+//				if (bot.getUserData().getBotNumber() == 1){
+//					System.out.println("bot 1 sorted distances" + sortedPlatformDistances);
+//				}
 
 //				bot.feed(closestPlatform, bot.distanceTo(goal.getPosition()));
-				bot.feed2(sortedPlatformDistances, bot.distanceTo(goal.getPosition()));
+				bot.feed2(platformsByDist, bot.distanceTo(goal.getPosition()));
 
 				bot.update(goal, levelTimer);
 				if (bot.isOutOfBounds(GameStage.minWorldWidth, GameStage.minWorldHeight)) {
@@ -110,8 +111,9 @@ public class GeneticAlgorithm {
 	private PlatformActor getClosestPlatform(List<PlatformActor> platforms, BotActor bot) {
 		PlatformActor closestPlatform = null;
 		float distance = Float.MAX_VALUE;
+		float test;
 		for (PlatformActor platform: platforms) {
-			float test = bot.distanceTo(platform.getPosition());
+			test = bot.distanceTo(platform.getPosition());
 			if (test < distance) {
 				distance = test;
 				closestPlatform = platform;
@@ -135,4 +137,5 @@ public class GeneticAlgorithm {
 		}
 		return  platformsByDist;
 	}
+
 }

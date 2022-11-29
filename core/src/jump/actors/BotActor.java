@@ -20,16 +20,19 @@ public class BotActor extends HeroActor{
 
     private static final int numberOfSeenPlatforms = 3;
 
+    private int highestPlatformReached; //TODO a priori platformnummer? oder einfach inkrement bei neuer platform?
+
 
 
 
     public BotActor(int botNumber) {
         super(GameStage.WorldMisc.createHero(spawn, botNumber));
-        neuralNetwork = new NeuralNetwork(numberOfSeenPlatforms+1,5,3); //TODO figure out topology, numberOfseenPlatforms + 1
+        neuralNetwork = new NeuralNetwork((numberOfSeenPlatforms*2)+1,5,3); //TODO figure out topology, numberOfseenPlatforms + 1
         jumpTimer = 0;
         isAlive = true;
         reachedGoal = false;
         score = 0;
+        highestPlatformReached = 0;
     }
 
     public BotActor(NeuralNetwork.FlattenNetwork net, int botNumber) {
@@ -39,6 +42,11 @@ public class BotActor extends HeroActor{
         isAlive = true;
         reachedGoal = false;
         score = 0;
+        highestPlatformReached = 0;
+    }
+
+    public void updateHighestPlatform(int platformNumber){
+        this.highestPlatformReached = Math.max(this.highestPlatformReached, platformNumber);
     }
 
     public void update(GoalActor goal, int aliveTime) {
@@ -47,11 +55,15 @@ public class BotActor extends HeroActor{
 
     private float scoreCalc(GoalActor goal, int aliveTime) { //TODO alivetime sinvoll?
         float goalDistScore = (reachedGoal ? 1000 : 100) / (1 + distanceTo(goal.body.getPosition()));
-        return goalDistScore;
+        return goalDistScore + Math.min(highestPlatformReached, 10); //encourage reaching new platforms to a certain degree (only first x platforms reached)
     }
 
     public float distanceTo(Vector2 target){
         return target.dst(this.body.getPosition());
+    }
+
+    public float angleTo(Vector2 target){
+        return (float) Math.atan2(this.body.getPosition().x - target.x, this.body.getPosition().y - target.y);
     }
 
     public float getScore() {
@@ -74,51 +86,47 @@ public class BotActor extends HeroActor{
                     closestPlatform.getY() / GameStage.minWorldHeight,
             };
 
-            float[] output = this.getNeuralNetwork().eval(inputs); //TODO outputs in what range?
-            if (this.getUserData().getBotNumber() == 1){
-                System.out.println("Bot number " + this.getUserData().getBotNumber() + Arrays.toString(inputs));
-                System.out.println("outputs: " + Arrays.toString(output));
-            }
-            if (output[0] > 0.5 && output[0] > output[1]){
-                this.moveRight();
-            } else if (output[1] > 0.5 && output[1] > output[0]){
-                this.moveLeft();
-            } else {
-                this.moveStop();
-            }
-            if (output[2]> 0.5)
-                this.jump();
+            botActions(inputs);
 
         }
     }
 
-    public void feed2(List<Float> sortedPlatformDistances, float distanceToGoal) {
-        if (sortedPlatformDistances != null && isAlive) {
+    public void feed2(List<PlatformActor> platformsByDistance, float distanceToGoal) {
+        if (platformsByDistance != null && isAlive) {
 
             float[] inputs = {
                     //1f, //bias, is that needed? or should you add this to NN?
                     distanceToGoal / GameStage.WorldMisc.MAXDIST , // alternative distance / GameStage.minWorldWidth
-                    sortedPlatformDistances.get(0), //TODO numberofseenplatforms
-                    sortedPlatformDistances.get(1),
-                    sortedPlatformDistances.get(2),
+                    this.distanceTo(platformsByDistance.get(0).getPosition()), //TODO numberofseenplatforms + sind angles sinnvoll?
+                    this.angleTo(platformsByDistance.get(0).getPosition()),
+                    this.distanceTo(platformsByDistance.get(1).getPosition()),
+                    this.angleTo(platformsByDistance.get(1).getPosition()),
+                    this.distanceTo(platformsByDistance.get(2).getPosition()),
+                    this.angleTo(platformsByDistance.get(2).getPosition()),
+
             };
 
-            float[] output = this.getNeuralNetwork().eval(inputs); //TODO outputs in what range?
-            if (this.getUserData().getBotNumber() == 1){
-                System.out.println("Bot number " + this.getUserData().getBotNumber() + Arrays.toString(inputs));
-                System.out.println("outputs: " + Arrays.toString(output));
-            }
-            if (output[0] > 0.5 && output[0] > output[1]){
-                this.moveRight();
-            } else if (output[1] > 0.5 && output[1] > output[0]){
-                this.moveLeft();
-            } else {
-                this.moveStop();
-            }
-            if (output[2]> 0.5)
-                this.jump();
+            botActions(inputs);
 
         }
+    }
+
+    private void botActions(float[] inputs) {
+        float[] output = this.getNeuralNetwork().eval(inputs); //TODO outputs in what range?
+        if (this.getUserData().getBotNumber() == 1){
+            System.out.println("Bot number " + this.getUserData().getBotNumber() + Arrays.toString(inputs));
+            System.out.println("outputs: " + Arrays.toString(output));
+            System.out.println("Bot 1 highest platform reached: " + highestPlatformReached);
+        }
+        if (output[0] > 0.5 && output[0] > output[1]){
+            this.moveRight();
+        } else if (output[1] > 0.5 && output[1] > output[0]){
+            this.moveLeft();
+        } else {
+            this.moveStop();
+        }
+        if (output[2]> 0.5)
+            this.jump();
     }
 
     @Override

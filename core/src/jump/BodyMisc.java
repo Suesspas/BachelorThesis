@@ -10,15 +10,21 @@ public class BodyMisc {
 
     }
 
-    public static boolean bodyIsHero(Body body) {
+    public static boolean bodyIsCharacter(Body body) {
         UserData userData = (UserData)body.getUserData();
         return userData != null && ((userData.getUserDataType() == UserDataType.HERO) || (userData.getUserDataType() == UserDataType.BOT));
+    }
+
+    public static boolean bodyIsHero(Body body) {
+        UserData userData = (UserData)body.getUserData();
+        return userData != null && ((userData.getUserDataType() == UserDataType.HERO));
     }
 
     public static boolean bodyIsGoal(Body body) {
         UserData userData = (UserData)body.getUserData();
         return userData != null && userData.getUserDataType() == UserDataType.GOAL;
     }
+
 
     //TODO also for y coordinates
     public static boolean bodyInBounds(Body body) {

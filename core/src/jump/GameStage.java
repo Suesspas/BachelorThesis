@@ -75,7 +75,6 @@ public class GameStage extends Stage implements ContactListener {
     }
 
     private void setupWorld() {
-
         wrl = new WorldMisc();
         world = wrl.createWorld();
         renderer = new Box2DDebugRenderer(true,true,true,true,true,true);
@@ -141,7 +140,7 @@ public class GameStage extends Stage implements ContactListener {
     private void setupPlatforms(List<Vector2> platformCoords){//TODO make hx and hy variable
         platforms = new ArrayList<>();
         for (int i = 0; i < platformCoords.size(); i++){
-            PlatformActor platformActor = new PlatformActor(WorldMisc.createPlatform(platformCoords.get(i), 5.0F, 1.0F));
+            PlatformActor platformActor = new PlatformActor(WorldMisc.createPlatform(platformCoords.get(i), 5.0F, 1.0F, i));
             platforms.add(platformActor);
             platforms.get(i).setPosition(platformCoords.get(i).x, platformCoords.get(i).y);
             addActor(platformActor);
@@ -292,17 +291,27 @@ public class GameStage extends Stage implements ContactListener {
     }*/
 
     @Override
-    public void beginContact(Contact contact) { //TODO bot contact + no collision between heroes
+    public void beginContact(Contact contact) {
         Fixture a = contact.getFixtureA();
         Fixture b = contact.getFixtureB();
         Body bodyA = a.getBody();
         Body bodyB = b.getBody();
 
-        //TODO identifiziere welcher bot kollidiert und führe landed() für denjenigen aus
-        if (a.isSensor() && !BodyMisc.bodyIsHero(bodyB)){
+        if (BodyMisc.bodyIsHero(bodyA) || BodyMisc.bodyIsHero(bodyB)) return; //TODO zu testzwecken hero noch in code, entfernen oder code unten anpassen
+
+        //identifiziere welcher bot kollidiert und führe landed() für denjenigen aus
+        if (a.isSensor() && !BodyMisc.bodyIsCharacter(bodyB)){
             landed(bodyA);
-        } else if (b.isSensor() && !BodyMisc.bodyIsHero(bodyA)) {
+            BotActor bot = bots.get(getBotNumber(bodyA));
+            PlatformUserData platformUserData = (PlatformUserData) bodyB.getUserData(); //TODO schauen ob conversion bei goalUserData funktioniert bei contact
+            bot.updateHighestPlatform(platformUserData.getPlatformNumber());
+            bot.update(goal, levelTimer);
+        } else if (b.isSensor() && !BodyMisc.bodyIsCharacter(bodyA)) {
             landed(bodyB);
+            BotActor bot = bots.get(getBotNumber(bodyB));
+            PlatformUserData platformUserData = (PlatformUserData) bodyA.getUserData();
+            bot.updateHighestPlatform(platformUserData.getPlatformNumber());
+            bot.update(goal, levelTimer);
         }
         //Bot reaches goal
         if ((a.isSensor() && BodyMisc.bodyIsGoal(b.getBody()))){
@@ -339,9 +348,9 @@ public class GameStage extends Stage implements ContactListener {
         Body bodyA = a.getBody();
         Body bodyB = b.getBody();
 
-        if (a.isSensor() && !BodyMisc.bodyIsHero(bodyB)){
+        if (a.isSensor() && !BodyMisc.bodyIsCharacter(bodyB)){
             setAirBorne(bodyA);
-        } else if (b.isSensor() && !BodyMisc.bodyIsHero(bodyA)) {
+        } else if (b.isSensor() && !BodyMisc.bodyIsCharacter(bodyA)) {
             setAirBorne(bodyB);
         }
     }
@@ -376,7 +385,7 @@ public class GameStage extends Stage implements ContactListener {
 
         public  World createWorld() {
 
-            System.out.println(MAXDIST);
+//            System.out.println(MAXDIST);
             return new World(new Vector2(0, -10), true);
         }
 
@@ -405,7 +414,7 @@ public class GameStage extends Stage implements ContactListener {
 
         }
 
-        public static Body createPlatform(Vector2 pos, float hx, float hy) {
+        public static Body createPlatform(Vector2 pos, float hx, float hy, int platformNumber) {
 
             BodyDef platform = new BodyDef();
             platform.type = BodyDef.BodyType.StaticBody;
@@ -424,7 +433,7 @@ public class GameStage extends Stage implements ContactListener {
             body.resetMassData();*/
 
             body.createFixture(platformShape, 0F);
-            body.setUserData(new PlatformUserData(2*hx, 2*hy));
+            body.setUserData(new PlatformUserData(2*hx, 2*hy, platformNumber));
             platformShape.dispose();
             return body;
 
