@@ -97,11 +97,11 @@ public class BotActor extends HeroActor{
             float[] inputs = {
                     //1f, //bias, is that needed? or should you add this to NN?
                     distanceToGoal / GameStage.WorldMisc.MAXDIST , // alternative distance / GameStage.minWorldWidth
-                    this.distanceTo(platformsByDistance.get(0).getPosition()), //TODO numberofseenplatforms + sind angles sinnvoll?
+                    this.distanceTo(platformsByDistance.get(0).getPosition()) / GameStage.WorldMisc.MAXDIST, //TODO numberofseenplatforms + sind angles sinnvoll?
                     this.angleTo(platformsByDistance.get(0).getPosition()),
-                    this.distanceTo(platformsByDistance.get(1).getPosition()),
+                    this.distanceTo(platformsByDistance.get(1).getPosition()) / GameStage.WorldMisc.MAXDIST,
                     this.angleTo(platformsByDistance.get(1).getPosition()),
-                    this.distanceTo(platformsByDistance.get(2).getPosition()),
+                    this.distanceTo(platformsByDistance.get(2).getPosition()) / GameStage.WorldMisc.MAXDIST,
                     this.angleTo(platformsByDistance.get(2).getPosition()),
 
             };

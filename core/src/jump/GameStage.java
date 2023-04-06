@@ -234,6 +234,9 @@ public class GameStage extends Stage implements ContactListener {
         levelTimer++;
     }
 
+    String generationStr; //TODO
+    String topScoreStr;
+    String botsAliveStr;
     @Override
     public void draw() {
 
@@ -241,9 +244,9 @@ public class GameStage extends Stage implements ContactListener {
         renderer.render(world, camera.combined);
 
         batch.setProjectionMatrix(camera.combined);
-        String generationStr = "Generation " + geneticAlgorithm.generation;
-        String topScoreStr = "Top score: " + geneticAlgorithm.getBestScore();
-        String botsAliveStr = "Bots alive: "+ bots.size();
+        generationStr = "Generation " + geneticAlgorithm.generation;
+        topScoreStr = "Top score: " + geneticAlgorithm.getBestScore();
+        botsAliveStr = "Bots alive: "+ bots.size();
 
         batch.begin();
 
