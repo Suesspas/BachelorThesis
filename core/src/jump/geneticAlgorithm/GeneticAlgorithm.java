@@ -20,13 +20,12 @@ public class GeneticAlgorithm {
 	public int populationSize = 100;
 	public float elitism = 0.2f;
 	public float mutationRate = 0.1f;
-	public float mutationStdDev = 0.5f;
+	public float mutationStdDev = 0f;
 	public float randomness = 0.2f;
 	public int childCount = 1;
 	
 	private NeuralNetwork bestGenome;
 
-	//TODO was ist mit bias? wo wird er eingebaut und ist er nötig?
 
 	public GeneticAlgorithm(List<BotActor> bots) {
 		this.population = new Population(bots);

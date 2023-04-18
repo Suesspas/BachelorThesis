@@ -53,7 +53,7 @@ public class BotActor extends HeroActor{
         this.score = Math.max(this.score, scoreCalc(goal, aliveTime));
     }
 
-    private float scoreCalc(GoalActor goal, int aliveTime) { //TODO alivetime sinvoll?
+    private float scoreCalc(GoalActor goal, int aliveTime) { //TODO alivetime sinvoll? + fitness value tuning
         float goalDistScore = (reachedGoal ? 1000 : 100) / (1 + distanceTo(goal.body.getPosition()));
         return goalDistScore + Math.min(highestPlatformReached, 10); //encourage reaching new platforms to a certain degree (only first x platforms reached)
     }
@@ -126,7 +126,7 @@ public class BotActor extends HeroActor{
         } else {
             this.moveStop();
         }
-        if (output[2]> 0.5)
+        if (output[2] > 0.5)
             this.jump();
     }
 
