@@ -62,8 +62,9 @@ public class BotActor extends HeroActor{
         return target.dst(this.body.getPosition());
     }
 
-    public float angleTo(Vector2 target){
-        return (float) Math.atan2(this.body.getPosition().x - target.x, this.body.getPosition().y - target.y);
+    public float angleTo(Vector2 target){ //normalized angle between [-1,1]
+        double atan = Math.atan2(this.body.getPosition().x - target.x, this.body.getPosition().y - target.y);
+        return (float) (atan / Math.PI);
     }
 
     public float getScore() {

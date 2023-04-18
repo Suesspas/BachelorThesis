@@ -32,7 +32,7 @@ public class Neuron {
 		this.value = 0;
 		this.weights = new ArrayList<Float>();
 		for (int i = 0; i < weightCount; i++) {
-			this.weights.add((float) (Math.random() * 2 - 1));
+			this.weights.add((float) (Math.random() * 2 - 1)); //TODO wertebereich anschauen
 		}
 	}
 }

@@ -51,7 +51,7 @@ public class Genotype {
 			}
 			for (int i = 0; i < childNet.weights.size(); i++) {
 				if (Math.random() <= mutationRate) {
-					childNet.weights.set(i, (float) Math.random()*2*mutationStdDev - mutationStdDev); //TODO verstehen bzw ist das richtig? sollte es nicht die existierenden werte verändern?
+					childNet.weights.set(i, (float) Math.random()*2*mutationStdDev - mutationStdDev); //TODO schauen, ob der Wertebereich sinvoll ist
 				}
 			}
 			children.add(new Genotype(childNet, 0)); //default bot number 0, is set after method call
