@@ -83,7 +83,7 @@ public class GameStage extends Stage implements ContactListener {
         setupHero();
     }
 
-    private void setupLevel(int levelNumber){//TODO set up levels 2+
+    private void setupLevel(int levelNumber){//TODO set up levels 4+
         List<Vector2> platformCoords = new ArrayList<>();
         switch (levelNumber){
             case 1:
@@ -237,6 +237,7 @@ public class GameStage extends Stage implements ContactListener {
     String generationStr; //TODO
     String topScoreStr;
     String botsAliveStr;
+    float bestBotScore = 0f;
     @Override
     public void draw() {
 
@@ -247,13 +248,15 @@ public class GameStage extends Stage implements ContactListener {
         generationStr = "Generation " + geneticAlgorithm.generation;
         topScoreStr = "Top score: " + geneticAlgorithm.getBestScore();
         botsAliveStr = "Bots alive: "+ bots.size();
+        bestBotScore = Math.max(geneticAlgorithm.getBestScore(), bestBotScore) ;
 
         batch.begin();
 
         font.draw(batch, String.valueOf(levelTimer), 1, getHeight()-3);
         font.draw(batch, generationStr, getWidth()/3, getHeight()-3);
         font.draw(batch, botsAliveStr, 2*getWidth()/3, getHeight()-3);
-        font.draw(batch, topScoreStr, 1, getHeight()-20);
+        font.draw(batch, topScoreStr, 1, getHeight()-15);
+        font.draw(batch, "Best Fitness so far:" + bestBotScore, 1, getHeight()-30);
 
         batch.end();
 

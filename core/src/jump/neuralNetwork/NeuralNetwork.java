@@ -55,9 +55,7 @@ public class NeuralNetwork {
 		for (Layer layer: this.layers) {
 			net.neurons.add(layer.neurons.size());
 			for (Neuron neuron: layer.neurons) {
-				for (float weight: neuron.weights) {
-					net.weights.add(weight);
-				}
+				net.weights.addAll(neuron.weights);
 			}
 		}
 		return net;
