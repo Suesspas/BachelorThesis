@@ -11,7 +11,6 @@ buildscript {
     dependencies {
         classpath 'org.wisepersist:gwt-gradle-plugin:1.1.16'
         classpath 'org.gretty:gretty:3.0.7'
-        
 
     }
 }
@@ -51,7 +50,6 @@ project(":desktop") {
         api "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-desktop"
         api "com.badlogicgames.gdx:gdx-box2d-platform:$gdxVersion:natives-desktop"
         api "com.badlogicgames.gdx-controllers:gdx-controllers-desktop:$gdxControllersVersion"
-        
     }
 }
 
@@ -88,6 +86,11 @@ project(":core") {
         api "com.badlogicgames.box2dlights:box2dlights:$box2DLightsVersion"
         api "com.badlogicgames.gdx-controllers:gdx-controllers-core:$gdxControllersVersion"
         api "com.badlogicgames.ashley:ashley:$ashleyVersion"
-        
+        // https://mvnrepository.com/artifact/org.xerial/sqlite-jdbc
+        implementation group: 'org.xerial', name: 'sqlite-jdbc', version: '3.41.2.1'
+        // https://mvnrepository.com/artifact/org.jooq/jooq
+        implementation group: 'org.jooq', name: 'jooq', version: '3.18.3'
+        implementation group: 'org.jooq', name: 'jooq-meta', version: '3.18.3'
+        implementation group: 'org.jooq', name: 'jooq-codegen', version: '3.18.3'
     }
 }

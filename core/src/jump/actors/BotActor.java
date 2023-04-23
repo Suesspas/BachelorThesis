@@ -125,7 +125,7 @@ public class BotActor extends HeroActor{
         } else {
             this.moveStop();
         }
-        if (output[2]> 0.5)
+        if (output[2] > 0.5)
             this.jump();
     }
 
