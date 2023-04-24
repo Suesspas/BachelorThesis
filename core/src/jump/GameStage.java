@@ -49,6 +49,7 @@ public class GameStage extends Stage implements ContactListener {
 
     public static final float minWorldWidth = 160f; //def 80f
     public static final float minWorldHeight = 90f; //def 45f
+    private static float physicsSpeedup = 4f;
     private static int levelTimer;
     private static int maxLevelTimer;
 
@@ -94,7 +95,7 @@ public class GameStage extends Stage implements ContactListener {
                 }
                 setupPlatforms(platformCoords);
                 levelTimer = 0;
-                maxLevelTimer = 500;
+                maxLevelTimer = (int) (500 / physicsSpeedup);
                 break;
             case 2:
                 clearLevel();
@@ -104,7 +105,7 @@ public class GameStage extends Stage implements ContactListener {
                 }
                 setupPlatforms(platformCoords);
                 levelTimer = 0;
-                maxLevelTimer = 900;
+                maxLevelTimer = (int) (900 / physicsSpeedup);
                 break;
             case 3:
                 clearLevel();
@@ -114,7 +115,7 @@ public class GameStage extends Stage implements ContactListener {
                 }
                 setupPlatforms(platformCoords);
                 levelTimer = 0;
-                maxLevelTimer = 900;
+                maxLevelTimer = (int) (900 / physicsSpeedup);
                 break;
             case 4:
                 break;
@@ -173,13 +174,8 @@ public class GameStage extends Stage implements ContactListener {
     @Override
     public void act(float delta) {
 
-        super.act(delta);
-        accumulator += delta;
-
-        while (accumulator >= delta) {
-            world.step(TIME_STEP, 8, 4);
-            accumulator -= TIME_STEP;
-        }
+        super.act(delta); //* physicsSpeedup ?
+        doPhysicsStep(delta * physicsSpeedup);
 
         //Player Movement
         if (left) {
@@ -232,6 +228,15 @@ public class GameStage extends Stage implements ContactListener {
             reset();
         }
         levelTimer++;
+    }
+
+    private void doPhysicsStep(float delta) {
+        float frameTime = Math.min(delta, 0.25f);
+        accumulator += frameTime;
+        while (accumulator >= frameTime) {
+            world.step(TIME_STEP, 6, 2); //TODO iterations were 8/4, but less may yield better perf
+            accumulator -= TIME_STEP;
+        }
     }
 
     String generationStr; //TODO

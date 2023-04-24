@@ -27,6 +27,13 @@ public class DBConTest {
             for (Record r : result) {
                 System.out.println(r);
             }
+//            Record record = context.newRecord("your_table");
+//
+//            record.set().setDate(Date.valueOf("2023-04-24")); // Set the date
+//            record.setText("Some text"); // Set the text
+//
+//            // Insert the record into the database
+//            record.store();
         } catch ( Exception e ) {
             System.err.println( e.getClass().getName() + ": " + e.getMessage() );
             System.exit(0);
