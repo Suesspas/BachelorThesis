@@ -23,6 +23,7 @@ public class HeroActor extends GameActors {
 
     public HeroActor(Body body) {
         super(body);
+        movingLinearImpulse = new Vector2();
     }
 
     public HeroUserData getUserData() {
@@ -39,7 +40,7 @@ public class HeroActor extends GameActors {
             finalVel = getUserData().getSpeedImpulse() - Math.max((velocityX), -maxSpeed);
         }
         //finalVel = getUserData().getSpeedImpulse() - velocityX;
-        movingLinearImpulse = new Vector2(finalVel, 0.0F);
+        movingLinearImpulse.set(finalVel, 0.0F);
         body.applyLinearImpulse(movingLinearImpulse, body.getWorldCenter(), true);
 
     }
@@ -54,7 +55,7 @@ public class HeroActor extends GameActors {
             finalVel = -getUserData().getSpeedImpulse() - Math.max((velocityX), -maxSpeed);
         }
         //finalVel = -getUserData().getSpeedImpulse() - velocityX;
-        movingLinearImpulse = new Vector2(finalVel, 0.0F);
+        movingLinearImpulse.set(finalVel, 0.0F);
         body.applyLinearImpulse(movingLinearImpulse, body.getWorldCenter(), true);
 
     }
@@ -68,7 +69,7 @@ public class HeroActor extends GameActors {
         } else {
             finalVel = 0.0f - Math.max((velocityX), -maxSpeed);
         }
-        movingLinearImpulse = new Vector2(finalVel/2, 0.0F);
+        movingLinearImpulse.set(finalVel/2, 0.0F);
         body.applyLinearImpulse(movingLinearImpulse, body.getWorldCenter(), true);
 
     }

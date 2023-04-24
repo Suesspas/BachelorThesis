@@ -92,10 +92,11 @@ public class BotActor extends HeroActor{
         }
     }
 
+    float[] test;
     public void feed2(List<PlatformActor> platformsByDistance, float distanceToGoal) {
         if (platformsByDistance != null && isAlive) {
 
-            float[] inputs = {
+            test = new float[]{
                     //1f, //bias, is that needed? or should you add this to NN?
                     distanceToGoal / GameStage.WorldMisc.MAXDIST , // alternative distance / GameStage.minWorldWidth
                     this.distanceTo(platformsByDistance.get(0).getPosition()) / GameStage.WorldMisc.MAXDIST, //TODO numberofseenplatforms + sind angles sinnvoll?
@@ -104,21 +105,19 @@ public class BotActor extends HeroActor{
                     this.angleTo(platformsByDistance.get(1).getPosition()),
                     this.distanceTo(platformsByDistance.get(2).getPosition()) / GameStage.WorldMisc.MAXDIST,
                     this.angleTo(platformsByDistance.get(2).getPosition()),
-
             };
 
-            botActions(inputs);
-
+            botActions(test);
         }
     }
 
-    private void botActions(float[] inputs) {
+    private void botActions(float... inputs) {
         float[] output = this.getNeuralNetwork().eval(inputs); //TODO outputs in what range?
-        if (this.getUserData().getBotNumber() == 1){
-            System.out.println("Bot number " + this.getUserData().getBotNumber() + Arrays.toString(inputs));
-            System.out.println("outputs: " + Arrays.toString(output));
-            System.out.println("Bot 1 highest platform reached: " + highestPlatformReached);
-        }
+//        if (this.getUserData().getBotNumber() == 1){
+//            System.out.println("Bot number " + this.getUserData().getBotNumber() + Arrays.toString(inputs));
+//            System.out.println("outputs: " + Arrays.toString(output));
+//            System.out.println("Bot 1 highest platform reached: " + highestPlatformReached);
+//        }
         if (output[0] > 0.5 && output[0] > output[1]){
             this.moveRight();
         } else if (output[1] > 0.5 && output[1] > output[0]){

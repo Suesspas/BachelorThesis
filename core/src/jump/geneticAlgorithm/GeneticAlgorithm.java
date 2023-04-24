@@ -8,6 +8,7 @@ import jump.neuralNetwork.NeuralNetwork;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -52,12 +53,12 @@ public class GeneticAlgorithm {
 				PlatformActor closestPlatform = getClosestPlatform(platforms, bot);
 
 				List<PlatformActor> platformsByDist = getXClosestPlatforms(3, platforms, bot); //TODO feed2, x init
-				List<Float> sortedPlatformDistances = new ArrayList<>();
-				for (PlatformActor platform : platforms) {
-					sortedPlatformDistances.add(bot.distanceTo(platform.getPosition()));
-					bot.angleTo(platform.getPosition());
-				}
-				Collections.sort(sortedPlatformDistances);
+//				List<Float> sortedPlatformDistances = new ArrayList<>();
+//				for (PlatformActor platform : platforms) {
+//					sortedPlatformDistances.add(bot.distanceTo(platform.getPosition()));
+//					bot.angleTo(platform.getPosition());
+//				}
+//				Collections.sort(sortedPlatformDistances);
 //				if (bot.getUserData().getBotNumber() == 1){
 //					System.out.println("bot 1 sorted distances" + sortedPlatformDistances);
 //				}
@@ -126,7 +127,7 @@ public class GeneticAlgorithm {
 			x = platforms.size();
 			System.err.println("Only " + platforms.size() + " platforms in level");
 		}
-		List<PlatformActor> tempPlats = new ArrayList<>(platforms);
+		List<PlatformActor> tempPlats = new LinkedList<>(platforms);
 		List<PlatformActor> platformsByDist = new ArrayList<>();
 		PlatformActor tempPlat;
 		for (int i = 0; i < x; i++){
@@ -134,7 +135,9 @@ public class GeneticAlgorithm {
 			platformsByDist.add(tempPlat);
 			tempPlats.remove(tempPlat);
 		}
-		return  platformsByDist;
+		tempPlats = null;
+		tempPlat = null;
+		return platformsByDist;
 	}
 
 }

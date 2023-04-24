@@ -21,6 +21,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>
 package jump.neuralNetwork;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 public class NeuralNetwork {
@@ -30,8 +31,8 @@ public class NeuralNetwork {
 		public List<Float> weights;
 		
 		public FlattenNetwork() {
-			this.neurons = new ArrayList<Integer>();
-			this.weights = new ArrayList<Float>();
+			this.neurons = new LinkedList<Integer>();
+			this.weights = new LinkedList<Float>();
 		}
 	}
 
@@ -41,12 +42,12 @@ public class NeuralNetwork {
 		this.layers = new ArrayList<Layer>();
 	}
 	
-	public NeuralNetwork(int... topolgy) {
+	public NeuralNetwork(int... topology) {
 		this();
 		int prevInputs = 0;
-		for (int i = 0; i < topolgy.length; i++) {
-			this.layers.add(new Layer(topolgy[i], prevInputs));
-			prevInputs = topolgy[i];
+		for (int i = 0; i < topology.length; i++) {
+			this.layers.add(new Layer(topology[i], prevInputs));
+			prevInputs = topology[i];
 		}
 	}
 	
