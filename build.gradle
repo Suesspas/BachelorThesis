@@ -1,26 +1,118 @@
-buildscript {
-    
+import org.jooq.meta.jaxb.Logging
 
+buildscript {
     repositories {
         mavenLocal()
         mavenCentral()
         gradlePluginPortal()
-        maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
+        maven { url "https://oss.sonatype.org/content/repositories/snapshots/"}
+//        maven{ url "https://mvnrepository.com/artifact/org.jooq/jooq-codegen/"}
         google()
     }
     dependencies {
         classpath 'org.wisepersist:gwt-gradle-plugin:1.1.16'
         classpath 'org.gretty:gretty:3.0.7'
-
+//        classpath 'org.jooq:jooq-codegen:3.18.3'
+//        classpath 'org.jooq:jooq-gradle-plugin:3.18.3'
+    }
+    configurations['classpath'].resolutionStrategy.eachDependency {
+        if (requested.group == 'org.jooq') {
+            useVersion '3.18.3'
+        }
     }
 }
+
+plugins {
+    id 'nu.studer.jooq' version '8.2'
+}
+dependencies {
+    jooqGenerator 'org.xerial:sqlite-jdbc:3.36.0'
+}
+jooq {
+    version = '3.18.3'  // the default (can be omitted)
+    edition = nu.studer.gradle.jooq.JooqEdition.OSS  // the default (can be omitted)
+    configurations {
+        main {  // name of the jOOQ configuration
+            generateSchemaSourceOnCompilation = true  // default (can be omitted)
+
+            generationTool {
+                logging = Logging.WARN
+                jdbc {
+                    driver = 'org.postgresql.Driver'
+                    url = 'jdbc:sqlite:jump.db'
+                    user = 'some_user'
+                    password = 'some_secret'
+                    properties {
+                        property {
+                            key = 'ssl'
+                            value = 'true'
+                        }
+                    }
+                }
+                generator {
+                    name = 'org.jooq.codegen.DefaultGenerator'
+                    database {
+                        name = 'org.jooq.meta.postgres.PostgresDatabase'
+                        inputSchema = 'public'
+                        forcedTypes {
+                            forcedType {
+                                name = 'varchar'
+                                includeExpression = '.*'
+                                includeTypes = 'JSONB?'
+                            }
+                            forcedType {
+                                name = 'varchar'
+                                includeExpression = '.*'
+                                includeTypes = 'INET'
+                            }
+                        }
+                    }
+                    generate {
+                        deprecated = false
+                        records = true
+                        immutablePojos = true
+                        fluentSetters = true
+                    }
+                    target {
+                        packageName = 'nu.studer.sample'
+                        directory = 'build/generated-src/jooq/main'  // default (can be omitted)
+                    }
+                    strategy.name = 'org.jooq.codegen.DefaultGeneratorStrategy'
+                }
+            }
+        }
+    }
+}
+
+//plugins {
+//    id 'java'
+//    id 'org.jooq' version '3.18.3'
+//}
+
+//repositories {
+//    jcenter()
+//}
+//
+//dependencies {
+//    implementation 'org.jooq:jooq:3.15.3'
+//    implementation 'org.jooq:jooq-meta:3.15.3'
+//    implementation 'org.jooq:jooq-codegen:3.15.3'
+//    implementation 'com.h2database:h2:1.4.200'
+//}
+
+//jooq {
+//    version = '3.18.3'
+//    edition = 'OSS'
+//    // Other configuration options go here
+//}
+
 
 allprojects {
     apply plugin: "eclipse"
 
     version = '1.0'
     ext {
-        appName = "drop"
+        appName = "jump"
         gdxVersion = '1.11.0'
         roboVMVersion = '2.3.16'
         box2DLightsVersion = '1.5'
@@ -78,7 +170,7 @@ project(":html") {
 
 project(":core") {
     apply plugin: "java-library"
-
+//    apply plugin: 'org.jooq'
 
     dependencies {
         api "com.badlogicgames.gdx:gdx:$gdxVersion"
