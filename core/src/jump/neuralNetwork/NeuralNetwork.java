@@ -34,6 +34,11 @@ public class NeuralNetwork {
 			this.neurons = new LinkedList<Integer>();
 			this.weights = new LinkedList<Float>();
 		}
+
+		@Override
+		public String toString() {
+			return neurons.toString() + "*" + weights.toString();
+		}
 	}
 
 	public List<Layer> layers;

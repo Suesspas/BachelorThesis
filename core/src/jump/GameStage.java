@@ -49,7 +49,7 @@ public class GameStage extends Stage implements ContactListener {
 
     public static final float minWorldWidth = 160f; //def 80f
     public static final float minWorldHeight = 90f; //def 45f
-    private static float physicsSpeedup = 4f;
+    private static float physicsSpeedup = 1f;
     private static int levelTimer;
     private static int maxLevelTimer;
 
@@ -66,6 +66,7 @@ public class GameStage extends Stage implements ContactListener {
         setupWorld();
 
         geneticAlgorithm = new GeneticAlgorithm();
+        DBConTest.init();
 
         bots = new ArrayList<>();
         for (Genotype genome: geneticAlgorithm.population.genomes) {
@@ -80,7 +81,7 @@ public class GameStage extends Stage implements ContactListener {
         world = wrl.createWorld();
         renderer = new Box2DDebugRenderer(true,true,true,true,true,true);
         world.setContactListener(this);
-        setupLevel(3);
+        setupLevel(2);
         setupHero();
     }
 

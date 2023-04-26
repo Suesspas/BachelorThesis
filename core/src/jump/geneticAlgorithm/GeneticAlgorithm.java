@@ -1,5 +1,6 @@
 package jump.geneticAlgorithm;
 
+import jump.DBConTest;
 import jump.GameStage;
 import jump.actors.BotActor;
 import jump.actors.GoalActor;
@@ -79,9 +80,9 @@ public class GeneticAlgorithm {
 
 	public void evolvePopulation() {
 		this.alive = this.populationSize;
-		this.generation++;
-		this.population.evolve(this.elitism, this.randomness, this.mutationRate, this.mutationStdDev, this.childCount);
+		this.population.evolve(this.elitism, this.randomness, this.mutationRate, this.mutationStdDev, this.childCount, this.generation);
 		this.bestGenome = this.population.genomes.get(0).getBot().getNeuralNetwork();
+		this.generation++;
 	}
 	
 	public NeuralNetwork getBestGenome() {
