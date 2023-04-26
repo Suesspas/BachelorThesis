@@ -13,7 +13,7 @@ import org.jooq.Record;
 import org.jooq.impl.*;
 public abstract class DBConTest {
     private static Connection db_connection = null;
-    private static String sql = "INSERT INTO bot_info (date, generation, fitness, neuralnetwork) VALUES (?, ?, ?, ?)";
+    private static String sql = "INSERT INTO bot_info (level, generation, score, fitness, date, neuralnetwork) VALUES (?, ?, ?, ?, ?, ?)";
     private static PreparedStatement pstmt = null;
     public static void main( String args[] ) {
         Connection connection = null;
@@ -63,17 +63,17 @@ public abstract class DBConTest {
         }
     }
     public static void saveGeneration(Population population, int generation){
-        Date date = Date.valueOf(java.time.LocalDate.now());
-        LocalDate lDate= java.time.LocalDate.now();
         LocalDateTime lDateTime= java.time.LocalDateTime.now().withNano(0);
         String dateString = lDateTime.toString();
         try {
             for (Genotype gene : population.genomes) {
                 BotActor bot = gene.getBot();
-                pstmt.setString(1, dateString);
+                pstmt.setInt(1, WorldMisc.level);
                 pstmt.setInt(2, generation);
-                pstmt.setFloat(3, gene.getFitness());
-                pstmt.setString(4, bot.getNeuralNetwork().flatten().toString());
+                pstmt.setFloat(3, bot.getScore());
+                pstmt.setFloat(4, gene.getFitness());
+                pstmt.setString(5, dateString);
+                pstmt.setString(6, bot.getNeuralNetwork().flatten().toString());
                 pstmt.executeUpdate();
             }
         } catch (SQLException e) {

@@ -75,7 +75,7 @@ public class GameStage extends Stage implements ContactListener {
         WorldMisc.createWorld();
         renderer = new Box2DDebugRenderer(true,true,true,true,true,true);
         WorldMisc.world.setContactListener(this);
-        setupLevel(2);
+        setupLevel(WorldMisc.level);
         setupHero();
     }
 
