@@ -2,6 +2,7 @@ package jump.geneticAlgorithm;
 
 import jump.DBConTest;
 import jump.GameStage;
+import jump.WorldMisc;
 import jump.actors.BotActor;
 import jump.actors.GoalActor;
 import jump.actors.PlatformActor;
@@ -68,7 +69,7 @@ public class GeneticAlgorithm {
 				bot.feed2(platformsByDist, bot.distanceTo(goal.getPosition()));
 
 				bot.update(goal, levelTimer);
-				if (bot.isOutOfBounds(GameStage.minWorldWidth, GameStage.minWorldHeight)) {
+				if (bot.isOutOfBounds(WorldMisc.minWorldWidth, WorldMisc.minWorldHeight)) {
 					bot.dead();
 					this.alive--;
 				}

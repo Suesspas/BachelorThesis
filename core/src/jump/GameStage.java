@@ -30,8 +30,6 @@ public class GameStage extends Stage implements ContactListener {
     private Box2DDebugRenderer renderer;
     //private B2dModel b2dModel;
     GeneticAlgorithm geneticAlgorithm;
-    private static World world;
-    private WorldMisc wrl;
     private GoalActor goal;
     private List<PlatformActor> platforms;
     /*private LeftWallActor leftWall;
@@ -46,15 +44,12 @@ public class GameStage extends Stage implements ContactListener {
 
     SpriteBatch batch = new SpriteBatch();
     BitmapFont font = new BitmapFont();
-
-    public static final float minWorldWidth = 160f; //def 80f
-    public static final float minWorldHeight = 90f; //def 45f
     private static float physicsSpeedup = 1f;
     private static int levelTimer;
     private static int maxLevelTimer;
 
     public GameStage(){
-        super(new ExtendViewport(minWorldWidth, minWorldHeight, new OrthographicCamera(16f, 9f)));
+        super(new ExtendViewport(WorldMisc.minWorldWidth, WorldMisc.minWorldHeight, new OrthographicCamera(16f, 9f)));
         accumulator = 0.0F;
         TIME_STEP = 1/300F; // recommended by libgdx
 
@@ -77,10 +72,9 @@ public class GameStage extends Stage implements ContactListener {
     }
 
     private void setupWorld() {
-        wrl = new WorldMisc();
-        world = wrl.createWorld();
+        WorldMisc.createWorld();
         renderer = new Box2DDebugRenderer(true,true,true,true,true,true);
-        world.setContactListener(this);
+        WorldMisc.world.setContactListener(this);
         setupLevel(2);
         setupHero();
     }
@@ -129,9 +123,9 @@ public class GameStage extends Stage implements ContactListener {
     private void clearLevel(){
         if (platforms == null) return;
         for (PlatformActor p : platforms) {
-            world.destroyBody(p.getBody());
+            WorldMisc.world.destroyBody(p.getBody());
         }
-        world.destroyBody(goal.getBody());
+        WorldMisc.world.destroyBody(goal.getBody());
     }
 
     private void setupGoal(float x, float y, float hx, float hy){
@@ -212,7 +206,7 @@ public class GameStage extends Stage implements ContactListener {
                 bots.remove(b);
 //            HeroUserData userData = (HeroUserData) b.getBody().getUserData();
 //            userData.setBotNumber(-1);
-                world.destroyBody(b.getBody());
+                WorldMisc.world.destroyBody(b.getBody());
             }
             //update bot numbers
             for (BotActor b : bots) {
@@ -224,7 +218,7 @@ public class GameStage extends Stage implements ContactListener {
 
         if (geneticAlgorithm.populationDead() || levelTimer % maxLevelTimer == maxLevelTimer-1) {//TODO change countdown timer for different levels
             for (BotActor b: bots) {
-                    world.destroyBody(b.getBody());
+                WorldMisc.world.destroyBody(b.getBody());
             }
             reset();
         }
@@ -235,7 +229,7 @@ public class GameStage extends Stage implements ContactListener {
         float frameTime = Math.min(delta, 0.25f);
         accumulator += frameTime;
         while (accumulator >= frameTime) {
-            world.step(TIME_STEP, 6, 2); //TODO iterations were 8/4, but less may yield better perf
+            WorldMisc.world.step(TIME_STEP, 6, 2); //TODO iterations were 8/4, but less may yield better perf
             accumulator -= TIME_STEP;
         }
     }
@@ -248,7 +242,7 @@ public class GameStage extends Stage implements ContactListener {
     public void draw() {
 
         super.draw();
-        renderer.render(world, camera.combined);
+        renderer.render(WorldMisc.world, camera.combined);
 
         batch.setProjectionMatrix(camera.combined);
         generationStr = "Generation " + geneticAlgorithm.generation;
@@ -388,134 +382,5 @@ public class GameStage extends Stage implements ContactListener {
 
     }
 
-    public static class WorldMisc {
 
-        static final float heroHeight = 0.8f;
-        static final float heroWidth = 0.4f;
-
-        public static final float MAXDIST = new Vector2(0,0).dst(minWorldWidth,minWorldHeight);
-
-        public  World createWorld() {
-
-//            System.out.println(MAXDIST);
-            return new World(new Vector2(0, -10), true);
-        }
-
-        public static Body createGoal(Vector2 pos, float hx, float hy) {
-
-            BodyDef goal = new BodyDef();
-            goal.type = BodyDef.BodyType.StaticBody;
-            goal.position.set(pos);
-            Body body = world.createBody(goal);
-            PolygonShape goalShape = new PolygonShape();
-            goalShape.setAsBox(hx, hy); //16.01F, 2.0F default
-
-           /* //give the body gravity, also needs dynamicBody
-            FixtureDef groundFixture = new FixtureDef();
-            groundFixture.density = 0.5F;
-            groundFixture.shape = goalShape;
-            groundFixture.friction = 0.0F;
-            body.createFixture(groundFixture);
-            body.setGravityScale(0.01F);
-            body.resetMassData();*/
-
-            body.createFixture(goalShape, 0.5F);
-            body.setUserData(new GoalUserData(2*(hx), 2*hy));
-            goalShape.dispose();
-            return body;
-
-        }
-
-        public static Body createPlatform(Vector2 pos, float hx, float hy, int platformNumber) {
-
-            BodyDef platform = new BodyDef();
-            platform.type = BodyDef.BodyType.StaticBody;
-            platform.position.set(pos);
-            Body body = world.createBody(platform);
-            PolygonShape platformShape = new PolygonShape();
-            platformShape.setAsBox(hx, hy);
-
-           /* //give the body gravity, also needs dynamicBody
-            FixtureDef groundFixture = new FixtureDef();
-            groundFixture.density = 0.5F;
-            groundFixture.shape = groundShape;
-            groundFixture.friction = 0.0F;
-            body.createFixture(groundFixture);
-            body.setGravityScale(0.01F);
-            body.resetMassData();*/
-
-            body.createFixture(platformShape, 0F);
-            body.setUserData(new PlatformUserData(2*hx, 2*hy, platformNumber));
-            platformShape.dispose();
-            return body;
-
-        }
-
-        public static Body createHero(Vector2 pos, int botNumber) {
-
-            BodyDef hero = new BodyDef();
-            hero.type = BodyDef.BodyType.DynamicBody;
-            hero.position.set(pos); // new Vector2(8F, 5F) default
-            hero.fixedRotation = true;
-            PolygonShape heroShape = new PolygonShape();
-            heroShape.setAsBox(heroWidth, heroHeight);
-            Body body = world.createBody(hero);
-            FixtureDef heroFixture = new FixtureDef();
-            heroFixture.density = 0.5F;
-            heroFixture.shape = heroShape;
-            heroFixture.friction = 0.0F;
-            heroFixture.filter.groupIndex = -1; //keine kollision zwischen heroes
-            body.createFixture(heroFixture);
-
-            PolygonShape footSensor = new PolygonShape();
-            footSensor.setAsBox(heroWidth - 0.1f, 0.1F, new Vector2(0,-heroHeight), 0);
-            FixtureDef footSensorFixture = new FixtureDef();
-            footSensorFixture.density = 0F;
-            footSensorFixture.shape = footSensor;
-            footSensorFixture.friction = 0.0F;
-            footSensorFixture.isSensor = true;
-            footSensorFixture.filter.groupIndex = -1;
-            body.createFixture(footSensorFixture);
-
-            body.setGravityScale(5F);
-            body.resetMassData();
-            if (botNumber < 0){
-                body.setUserData(new HeroUserData(2*heroWidth, 2*heroHeight));
-            } else {
-                body.setUserData(new BotUserData(2*heroWidth, 2*heroHeight, botNumber));
-            }
-            heroShape.dispose();
-            return body;
-        }
-
-        /*public Body createLeftWall(World world) {
-
-            BodyDef leftWall = new BodyDef();
-            leftWall.type = BodyDef.BodyType.StaticBody;
-            leftWall.position.set(new Vector2(-1.0F, 12.0F));
-            Body body = world.createBody(leftWall);
-            PolygonShape leftWallShape = new PolygonShape();
-            leftWallShape.setAsBox(1.0F, 11.0F);
-            body.createFixture(leftWallShape, 0.5F);
-            body.setUserData(new LeftWallUserData(2.0F, 22.0F));
-            leftWallShape.dispose();
-            return body;
-
-        }
-
-        public Body createRightWall(World world) {
-
-            BodyDef rightWall = new BodyDef();
-            rightWall.type = BodyDef.BodyType.StaticBody;
-            rightWall.position.set(new Vector2(17F, 12.0F));
-            Body body = world.createBody(rightWall);
-            PolygonShape rightWallShape = new PolygonShape();
-            rightWallShape.setAsBox(0.999F, 11.0F);
-            body.createFixture(rightWallShape, 0.5F);
-            body.setUserData(new RightWallUserData(1.998F, 22.0F));
-            rightWallShape.dispose();
-            return body;
-
-        }*/
-    }
 }

@@ -3,6 +3,7 @@ package jump.actors;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
 import jump.GameStage;
+import jump.WorldMisc;
 import jump.neuralNetwork.NeuralNetwork;
 
 import java.util.Arrays;
@@ -26,7 +27,7 @@ public class BotActor extends HeroActor{
 
 
     public BotActor(int botNumber) {
-        super(GameStage.WorldMisc.createHero(spawn, botNumber));
+        super(WorldMisc.createHero(spawn, botNumber));
         neuralNetwork = new NeuralNetwork((numberOfSeenPlatforms*2)+1,5,3); //TODO figure out topology, numberOfseenPlatforms + 1
         jumpTimer = 0;
         isAlive = true;
@@ -36,7 +37,7 @@ public class BotActor extends HeroActor{
     }
 
     public BotActor(NeuralNetwork.FlattenNetwork net, int botNumber) {
-        super(GameStage.WorldMisc.createHero(spawn, botNumber));
+        super(WorldMisc.createHero(spawn, botNumber));
         neuralNetwork = NeuralNetwork.expand(net);
         jumpTimer = 0;
         isAlive = true;
@@ -80,11 +81,11 @@ public class BotActor extends HeroActor{
 
             float[] inputs = {
                     //1f, //bias, is that needed? or should you add this to NN?
-                    distanceToGoal / GameStage.WorldMisc.MAXDIST , // alternative distance / GameStage.minWorldWidth
-                    this.body.getPosition().x / GameStage.minWorldWidth,
-                    this.body.getPosition().y / GameStage.minWorldHeight,
-                    closestPlatform.getX() / GameStage.minWorldWidth,
-                    closestPlatform.getY() / GameStage.minWorldHeight,
+                    distanceToGoal / WorldMisc.MAXDIST , // alternative distance / GameStage.minWorldWidth
+                    this.body.getPosition().x / WorldMisc.minWorldWidth,
+                    this.body.getPosition().y / WorldMisc.minWorldHeight,
+                    closestPlatform.getX() / WorldMisc.minWorldWidth,
+                    closestPlatform.getY() / WorldMisc.minWorldHeight,
             };
 
             botActions(inputs);
@@ -98,12 +99,12 @@ public class BotActor extends HeroActor{
 
             test = new float[]{
                     //1f, //bias, is that needed? or should you add this to NN?
-                    distanceToGoal / GameStage.WorldMisc.MAXDIST , // alternative distance / GameStage.minWorldWidth
-                    this.distanceTo(platformsByDistance.get(0).getPosition()) / GameStage.WorldMisc.MAXDIST, //TODO numberofseenplatforms + sind angles sinnvoll?
+                    distanceToGoal / WorldMisc.MAXDIST , // alternative distance / GameStage.minWorldWidth
+                    this.distanceTo(platformsByDistance.get(0).getPosition()) / WorldMisc.MAXDIST, //TODO numberofseenplatforms + sind angles sinnvoll?
                     this.angleTo(platformsByDistance.get(0).getPosition()),
-                    this.distanceTo(platformsByDistance.get(1).getPosition()) / GameStage.WorldMisc.MAXDIST,
+                    this.distanceTo(platformsByDistance.get(1).getPosition()) / WorldMisc.MAXDIST,
                     this.angleTo(platformsByDistance.get(1).getPosition()),
-                    this.distanceTo(platformsByDistance.get(2).getPosition()) / GameStage.WorldMisc.MAXDIST,
+                    this.distanceTo(platformsByDistance.get(2).getPosition()) / WorldMisc.MAXDIST,
                     this.angleTo(platformsByDistance.get(2).getPosition()),
             };
 
@@ -157,7 +158,7 @@ public class BotActor extends HeroActor{
     }
 
     public void setNumber(int botNumber) { //TODO whack
-        body = GameStage.WorldMisc.createHero(spawn, botNumber);
+        body = WorldMisc.createHero(spawn, botNumber);
     }
 
     public boolean isOutOfBounds(float x, float y){
