@@ -4,8 +4,8 @@ import java.time.LocalDateTime;
 
 import jump.WorldMisc;
 import jump.actors.BotActor;
-import jump.geneticAlgorithm.Genotype;
-import jump.geneticAlgorithm.Population;
+import jump.evolutionaryAlgorithm.Genotype;
+import jump.evolutionaryAlgorithm.Population;
 import org.jooq.*;
 import org.jooq.Record;
 import org.jooq.impl.*;
@@ -62,7 +62,7 @@ public abstract class DatabaseConnector {
             System.exit(0);
         }
     }
-    public static void saveGeneration(Population population, int generation){
+    public static void saveGeneration(Population population, int generation, int eaType, int nnType){
         LocalDateTime lDateTime= java.time.LocalDateTime.now().withNano(0);
         String dateString = lDateTime.toString();
         try {
@@ -73,8 +73,10 @@ public abstract class DatabaseConnector {
                 pstmt_save_bot.setInt(2, WorldMisc.level);
                 pstmt_save_bot.setFloat(3, bot.getScore());
                 pstmt_save_bot.setFloat(4, gene.getFitness());
-                pstmt_save_bot.setString(5, dateString);
-                pstmt_save_bot.setString(6, bot.getNeuralNetwork().flatten().toString());
+                pstmt_save_bot.setInt(5, eaType);
+                pstmt_save_bot.setInt(6, nnType);
+                pstmt_save_bot.setString(7, dateString);
+                pstmt_save_bot.setString(8, bot.getNeuralNetwork().flatten().weightsToString());
                 pstmt_save_bot.executeUpdate();
             }
         } catch (SQLException e) {

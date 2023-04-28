@@ -1,12 +1,10 @@
 package jump.actors;
 
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.physics.box2d.Body;
-import jump.GameStage;
 import jump.WorldMisc;
 import jump.neuralNetwork.NeuralNetwork;
 
-import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
 
 public class BotActor extends HeroActor{
@@ -26,9 +24,9 @@ public class BotActor extends HeroActor{
 
 
 
-    public BotActor(int botNumber) {
+    public BotActor(int botNumber, int[] nnTopology) {
         super(WorldMisc.createHero(spawn, botNumber));
-        neuralNetwork = new NeuralNetwork((numberOfSeenPlatforms*2)+1,5,3); //TODO figure out topology, numberOfseenPlatforms + 1
+        neuralNetwork = new NeuralNetwork(nnTopology); //TODO test different topologies, was (numberOfSeenPlatforms*2)+1,5,3
         jumpTimer = 0;
         isAlive = true;
         reachedGoal = false;

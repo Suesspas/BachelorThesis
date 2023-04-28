@@ -15,8 +15,8 @@ import jump.actors.GoalActor;
 import jump.actors.HeroActor;
 import jump.actors.PlatformActor;
 import jump.data.DatabaseConnector;
-import jump.geneticAlgorithm.EvolutionaryAlgorithm;
-import jump.geneticAlgorithm.Genotype;
+import jump.evolutionaryAlgorithm.EvolutionaryAlgorithm;
+import jump.evolutionaryAlgorithm.Genotype;
 import jump.userdata.HeroUserData;
 import jump.userdata.PlatformUserData;
 

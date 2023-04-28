@@ -21,6 +21,15 @@ public class NNParametersDAO {
         }
     }
 
+    public int[] getTopologyArray(){
+        String[] strArray = topology.split(",");
+        int[] topology = new int[strArray.length];
+        for (int i = 0; i < strArray.length; i++) {
+            topology[i] = Integer.parseInt(strArray[i]);
+        }
+        return topology;
+    }
+
     public int getId() {
         return id;
     }

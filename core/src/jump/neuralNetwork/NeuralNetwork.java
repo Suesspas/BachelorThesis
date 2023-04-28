@@ -39,6 +39,11 @@ public class NeuralNetwork {
 		public String toString() {
 			return neurons.toString() + "*" + weights.toString();
 		}
+
+		public String weightsToString(){
+			String weightsString = weights.toString();
+			return weightsString.substring(1, weightsString.length() - 1);
+		}
 	}
 
 	public List<Layer> layers;
