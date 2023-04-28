@@ -5,6 +5,7 @@ import jump.actors.BotActor;
 import jump.actors.GoalActor;
 import jump.actors.PlatformActor;
 import jump.data.EAParametersDAO;
+import jump.data.NNParametersDAO;
 import jump.neuralNetwork.NeuralNetwork;
 
 import java.util.ArrayList;
@@ -17,6 +18,7 @@ public class EvolutionaryAlgorithm {
 	public int alive;
 	public int generation;
 	public final int EA_TYPE = 2;
+	public final int NN_TYPE = 1;
 	public int populationSize; //= 100;
 	public float elitism;// = 0.2f;
 	public float mutationRate;// = 0.1f; //TODO load parameters from database, until then:
@@ -39,6 +41,8 @@ public class EvolutionaryAlgorithm {
 		//this.bestGenome = this.population.genomes.get(0).bird.net;
 		this.generation = 1;
 		EAParametersDAO eaParametersDAO = new EAParametersDAO(EA_TYPE);
+		NNParametersDAO nnParametersDAO = new NNParametersDAO(NN_TYPE);
+		//TODO use nnParametersDAO and pass topology to BotActor() constructor
 		this.populationSize = eaParametersDAO.getPopulationSize();
 		this.elitism = eaParametersDAO.getElitismRate();
 		this.mutationRate = eaParametersDAO.getMutationRate();

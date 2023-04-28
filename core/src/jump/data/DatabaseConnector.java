@@ -11,8 +11,10 @@ import org.jooq.Record;
 import org.jooq.impl.*;
 public abstract class DatabaseConnector {
     private static Connection db_connection = null;
-    private static String sql = "INSERT INTO bot_info (level, generation, score, fitness, date, neuralnetwork) VALUES (?, ?, ?, ?, ?, ?)";
-    private static PreparedStatement pstmt = null;
+    private final static String sql_save_bot_str =
+            "INSERT INTO agents (generation, level, score, fitness, NN_parameters, EA_parameters, created_at, NN_weights) " +
+                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+    private static PreparedStatement pstmt_save_bot = null;
     public static void main( String args[] ) {
         Connection connection = null;
         try {
@@ -54,7 +56,7 @@ public abstract class DatabaseConnector {
             Class.forName("org.sqlite.JDBC");
             db_connection = DriverManager.getConnection("jdbc:sqlite:jump.db");
             System.out.println("Connection to SQLite has been established.");
-            pstmt = db_connection.prepareStatement(sql);
+            pstmt_save_bot = db_connection.prepareStatement(sql_save_bot_str);
         } catch ( Exception e ) {
             System.err.println( e.getClass().getName() + ": " + e.getMessage() );
             System.exit(0);
@@ -66,21 +68,26 @@ public abstract class DatabaseConnector {
         try {
             for (Genotype gene : population.genomes) {
                 BotActor bot = gene.getBot();
-                pstmt.setInt(1, WorldMisc.level);
-                pstmt.setInt(2, generation);
-                pstmt.setFloat(3, bot.getScore());
-                pstmt.setFloat(4, gene.getFitness());
-                pstmt.setString(5, dateString);
-                pstmt.setString(6, bot.getNeuralNetwork().flatten().toString());
-                pstmt.executeUpdate();
+                // (generation, level, score, fitness, NN_parameters, EA_parameters, created_at, NN_weights)
+                pstmt_save_bot.setInt(1, generation);
+                pstmt_save_bot.setInt(2, WorldMisc.level);
+                pstmt_save_bot.setFloat(3, bot.getScore());
+                pstmt_save_bot.setFloat(4, gene.getFitness());
+                pstmt_save_bot.setString(5, dateString);
+                pstmt_save_bot.setString(6, bot.getNeuralNetwork().flatten().toString());
+                pstmt_save_bot.executeUpdate();
             }
         } catch (SQLException e) {
             System.out.println(e.getMessage());
         }
     }
 
-    public static ResultSet loadEAParametersByID(int id) {
-        String query = "SELECT * FROM EA_parameters WHERE id = ?";
+    enum ParameterType{
+        EA,
+        NN
+    }
+    public static ResultSet loadParametersByID(int id, ParameterType type) {
+        String query = "SELECT * FROM " + type.toString() + "_parameters WHERE id = ?";
         try {
             PreparedStatement statement = db_connection.prepareStatement(query);
             statement.setInt(1, id);

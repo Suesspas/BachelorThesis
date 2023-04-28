@@ -19,7 +19,7 @@ public class EAParametersDAO {
     public EAParametersDAO(int eaType) {
         this.id = eaType;
         try {
-            ResultSet result = DatabaseConnector.loadEAParametersByID(eaType);
+            ResultSet result = DatabaseConnector.loadParametersByID(eaType, DatabaseConnector.ParameterType.EA);
             assert result != null;
             if (!result.next()) return;
             this.mutationRate = result.getFloat("mutation_rate");

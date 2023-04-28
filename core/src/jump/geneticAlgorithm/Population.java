@@ -21,7 +21,8 @@ public class Population {
 	public void evolve(float elitism, float randomness, float mutationRate, float mutationStdDev, int childCount, int generation) {
 		this.normalFitnessDistribution();
 		this.sortByFitness();
-		DatabaseConnector.saveGeneration(this, generation);
+		// TODO int nnID = genomes.get(0).getBot().getNeuralNetwork().getID();
+		DatabaseConnector.saveGeneration(this, generation); //here because fitness is calculated before
 		System.out.println("top fitness: " + genomes.get(0).getFitness()
 				+ ", " + genomes.get(1).getFitness()
 				+ ", " + genomes.get(2).getFitness());
