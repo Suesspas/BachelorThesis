@@ -1,6 +1,6 @@
 package jump.geneticAlgorithm;
 
-import jump.DBConTest;
+import jump.data.DatabaseConnector;
 import jump.actors.BotActor;
 import jump.neuralNetwork.NeuralNetwork;
 
@@ -21,7 +21,7 @@ public class Population {
 	public void evolve(float elitism, float randomness, float mutationRate, float mutationStdDev, int childCount, int generation) {
 		this.normalFitnessDistribution();
 		this.sortByFitness();
-		DBConTest.saveGeneration(this, generation);
+		DatabaseConnector.saveGeneration(this, generation);
 		System.out.println("top fitness: " + genomes.get(0).getFitness()
 				+ ", " + genomes.get(1).getFitness()
 				+ ", " + genomes.get(2).getFitness());
@@ -33,7 +33,7 @@ public class Population {
 		for (int i = 0; i < eliteCount; i++) {
 			nextGeneration.add(new Genotype(this.genomes.get(i),nextGeneration.size()));
 		}
-		int randomCount = Math.round(randomness*this.genomes.size());
+		int randomCount = Math.round(randomness*this.genomes.size()); //TODO adjust complete randomness
 		for (int i = 0; i < randomCount; i++) {
 			NeuralNetwork.FlattenNetwork net  = this.genomes.get(0).getBot().getNeuralNetwork().flatten();
 			for (int j = 1; j < net.weights.size(); j++) {

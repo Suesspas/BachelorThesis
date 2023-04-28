@@ -14,10 +14,9 @@ import jump.actors.BotActor;
 import jump.actors.GoalActor;
 import jump.actors.HeroActor;
 import jump.actors.PlatformActor;
-import jump.geneticAlgorithm.GeneticAlgorithm;
+import jump.data.DatabaseConnector;
+import jump.geneticAlgorithm.EvolutionaryAlgorithm;
 import jump.geneticAlgorithm.Genotype;
-import jump.userdata.BotUserData;
-import jump.userdata.GoalUserData;
 import jump.userdata.HeroUserData;
 import jump.userdata.PlatformUserData;
 
@@ -29,7 +28,7 @@ public class GameStage extends Stage implements ContactListener {
     private float accumulator, TIME_STEP;
     private Box2DDebugRenderer renderer;
     //private B2dModel b2dModel;
-    GeneticAlgorithm geneticAlgorithm;
+    EvolutionaryAlgorithm evolutionaryAlgorithm;
     private GoalActor goal;
     private List<PlatformActor> platforms;
     /*private LeftWallActor leftWall;
@@ -60,11 +59,11 @@ public class GameStage extends Stage implements ContactListener {
 
         setupWorld();
 
-        geneticAlgorithm = new GeneticAlgorithm();
-        DBConTest.init();
+        DatabaseConnector.init();
+        evolutionaryAlgorithm = new EvolutionaryAlgorithm();
 
         bots = new ArrayList<>();
-        for (Genotype genome: geneticAlgorithm.population.genomes) {
+        for (Genotype genome: evolutionaryAlgorithm.population.genomes) {
             bots.add(genome.getBot());
         }
 
@@ -189,7 +188,7 @@ public class GameStage extends Stage implements ContactListener {
         }
         playerJumpTimer--;
 
-        geneticAlgorithm.updatePopulation(platforms, goal, levelTimer);
+        evolutionaryAlgorithm.updatePopulation(platforms, goal, levelTimer);
 
         List<BotActor> deadBots = new ArrayList<>();
 
@@ -216,7 +215,7 @@ public class GameStage extends Stage implements ContactListener {
         }
 
 
-        if (geneticAlgorithm.populationDead() || levelTimer % maxLevelTimer == maxLevelTimer-1) {//TODO change countdown timer for different levels
+        if (evolutionaryAlgorithm.populationDead() || levelTimer % maxLevelTimer == maxLevelTimer-1) {//TODO change countdown timer for different levels
             for (BotActor b: bots) {
                 WorldMisc.world.destroyBody(b.getBody());
             }
@@ -245,10 +244,10 @@ public class GameStage extends Stage implements ContactListener {
         renderer.render(WorldMisc.world, camera.combined);
 
         batch.setProjectionMatrix(camera.combined);
-        generationStr = "Generation " + geneticAlgorithm.generation;
-        topScoreStr = "Top score: " + geneticAlgorithm.getBestScore();
+        generationStr = "Generation " + evolutionaryAlgorithm.generation;
+        topScoreStr = "Top score: " + evolutionaryAlgorithm.getBestScore();
         botsAliveStr = "Bots alive: "+ bots.size();
-        bestBotScore = Math.max(geneticAlgorithm.getBestScore(), bestBotScore) ;
+        bestBotScore = Math.max(evolutionaryAlgorithm.getBestScore(), bestBotScore) ;
 
         batch.begin();
 
@@ -276,10 +275,10 @@ public class GameStage extends Stage implements ContactListener {
     }
 
     private void reset() {
-        geneticAlgorithm.evolvePopulation(); //TODO test
-        List<Genotype> genomes = geneticAlgorithm.population.genomes;
+        evolutionaryAlgorithm.evolvePopulation(); //TODO test
+        List<Genotype> genomes = evolutionaryAlgorithm.population.genomes;
         for (int i = 0; i < genomes.size(); i++) {
-            BotActor bot = geneticAlgorithm.population.genomes.get(i).getBot();
+            BotActor bot = evolutionaryAlgorithm.population.genomes.get(i).getBot();
             if (i < bots.size()) {
                 bots.set(i, bot);
                 addActor(bot);
