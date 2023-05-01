@@ -12,10 +12,7 @@ import jump.neuralNetwork.NeuralNetwork;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Properties;
+import java.util.*;
 
 public class EvolutionaryAlgorithm {
 
@@ -26,12 +23,13 @@ public class EvolutionaryAlgorithm {
 	private int nnType;
 	public int populationSize; //= 100;
 	public float elitism;// = 0.2f;
-	public float mutationRate;// = 0.1f; //TODO load parameters from database, until then:
-	public float mutationStdDev;// = 0f; //Just add a new entry in the db and change ea_id
+	public float mutationRate;// = 0.1f; //old default values
+	public float mutationStdDev;// = 0f;
 	public float randomness;// = 0.2f;
 	public int childCount;// = 1;
 
 	private NeuralNetwork bestGenome;
+	private int rundID;
 
 
 	public EvolutionaryAlgorithm(List<BotActor> bots) {
@@ -52,11 +50,13 @@ public class EvolutionaryAlgorithm {
 		}
 		eaType = Integer.parseInt(props.getProperty("ea.config"));
 		nnType = Integer.parseInt(props.getProperty("nn.config"));
+		//TODO figure out when to load WorldMisc.level from config
 		this.generation = 1;
 		EAParametersDAO eaParametersDAO = new EAParametersDAO(eaType);
 		NNParametersDAO nnParametersDAO = new NNParametersDAO(nnType);
 		int[] nnTopology = nnParametersDAO.getTopologyArray();
-		//TODO use nnParametersDAO and pass topology to BotActor() constructor
+		//TODO save run here
+		rundID = DatabaseConnector.saveRun(WorldMisc.level, nnType, eaType);
 		this.populationSize = eaParametersDAO.getPopulationSize();
 		this.elitism = eaParametersDAO.getElitismRate();
 		this.mutationRate = eaParametersDAO.getMutationRate();
@@ -65,6 +65,7 @@ public class EvolutionaryAlgorithm {
 		this.childCount = eaParametersDAO.getChildCount();
 
 		List<BotActor> bots = new ArrayList<>();
+		System.out.println("nnTopology is " + Arrays.toString(nnTopology));
 		for (int i = 0; i < populationSize; i++){
 			bots.add(new BotActor(i, nnTopology));
 		}
@@ -105,8 +106,8 @@ public class EvolutionaryAlgorithm {
 	public void evolvePopulation() {
 		this.alive = this.populationSize;
 		this.population.fitnessEvaluation();
-		// TODO int nnID = genomes.get(0).getBot().getNeuralNetwork().getID();
-		DatabaseConnector.saveGeneration(this.population, this.generation, nnType, eaType); //here because fitness is calculated before
+		// TODO change nntype,eatype to runID
+		DatabaseConnector.saveGeneration(this.population, this.generation, this.rundID); //here because fitness is calculated before
 		this.population.evolve(this.elitism, this.randomness, this.mutationRate, this.mutationStdDev, this.childCount);
 		this.bestGenome = this.population.genomes.get(0).getBot().getNeuralNetwork();
 		this.generation++;

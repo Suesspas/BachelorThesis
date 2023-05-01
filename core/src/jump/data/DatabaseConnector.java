@@ -12,8 +12,8 @@ import org.jooq.impl.*;
 public abstract class DatabaseConnector {
     private static Connection db_connection = null;
     private final static String sql_save_bot_str =
-            "INSERT INTO agents (generation, level, score, fitness, NN_parameters, EA_parameters, created_at, NN_weights) " +
-                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+            "INSERT INTO agents (generation, score, fitness, run_id, NN_weights) " +
+                    "VALUES (?, ?, ?, ?, ?)";
     private static PreparedStatement pstmt_save_bot = null;
     public static void main( String args[] ) {
         Connection connection = null;
@@ -62,26 +62,46 @@ public abstract class DatabaseConnector {
             System.exit(0);
         }
     }
-    public static void saveGeneration(Population population, int generation, int eaType, int nnType){
-        LocalDateTime lDateTime= java.time.LocalDateTime.now().withNano(0);
-        String dateString = lDateTime.toString();
+    public static void saveGeneration(Population population, int generation, int runID){
         try {
             for (Genotype gene : population.genomes) {
                 BotActor bot = gene.getBot();
                 // (generation, level, score, fitness, NN_parameters, EA_parameters, created_at, NN_weights)
                 pstmt_save_bot.setInt(1, generation);
-                pstmt_save_bot.setInt(2, WorldMisc.level);
-                pstmt_save_bot.setFloat(3, bot.getScore());
-                pstmt_save_bot.setFloat(4, gene.getFitness());
-                pstmt_save_bot.setInt(5, eaType);
-                pstmt_save_bot.setInt(6, nnType);
-                pstmt_save_bot.setString(7, dateString);
-                pstmt_save_bot.setString(8, bot.getNeuralNetwork().flatten().weightsToString());
+                pstmt_save_bot.setFloat(2, bot.getScore());
+                pstmt_save_bot.setFloat(3, gene.getFitness());
+                pstmt_save_bot.setInt(4, runID);
+                pstmt_save_bot.setString(5, bot.getNeuralNetwork().flatten().weightsToString());
                 pstmt_save_bot.executeUpdate();
             }
         } catch (SQLException e) {
             System.out.println(e.getMessage());
         }
+    }
+
+    public static int saveRun(int level, int nnParametersId, int eaParametersId) {
+        LocalDateTime lDateTime= java.time.LocalDateTime.now().withNano(0);
+        String dateString = lDateTime.toString();
+        try {
+            String insertQuery = "INSERT INTO runs (level, NN_parameters, EA_parameters, execution_start) VALUES (?, ?, ?, ?)";
+            PreparedStatement ps = db_connection.prepareStatement(insertQuery);
+            ps.setInt(1, level);
+            ps.setInt(2, nnParametersId);
+            ps.setInt(3, eaParametersId);
+            ps.setString(4, dateString);
+            ps.executeUpdate();
+            int runID = -1;
+            ResultSet rs = ps.getGeneratedKeys();
+            if (rs.next()) {
+                runID = rs.getInt(1);
+            }
+            rs.close();
+            ps.close();
+            return runID;
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+        return -1;
     }
 
     enum ParameterType{
