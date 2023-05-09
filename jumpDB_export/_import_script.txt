@@ -1,0 +1,6 @@
+#run script in jump directory to import db changes
+
+for file in db_export/*.csv; do
+  table_name=$(basename "$file" .csv)
+  sqlite3 /path/to/database.db ".import '$file' '$table_name'"
+done
