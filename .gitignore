@@ -1,5 +1,5 @@
 ## Java
-
+*.db
 *.class
 *.war
 *.ear
