@@ -4,3 +4,9 @@ for file in db_export/*.csv; do
   table_name=$(basename "$file" .csv)
   sqlite3 /path/to/database.db ".import '$file' '$table_name'"
 done
+
+@echo off
+for %%f in (db_export\*.csv) do (
+    sqlite3.exe /path/to/database.db ".import '%%f' '%%~nf'"
+)
+
