@@ -1,0 +1,69 @@
+table,bot_info,bot_info,2,"CREATE TABLE bot_info (
+                                        level INT NOT NULL,
+                                        generation INT NOT NULL,
+                                        score FLOAT NOT NULL,
+                                        fitness FLOAT NOT NULL,
+                                        date DATE NOT NULL,
+                                        neuralnetwork VARCHAR(255) NOT NULL,
+                                        PRIMARY KEY (date, generation, neuralnetwork)
+)"
+index,sqlite_autoindex_bot_info_1,bot_info,3,
+table,sqlite_sequence,sqlite_sequence,7,"CREATE TABLE sqlite_sequence(name,seq)"
+table,NN_parameters,NN_parameters,4,"CREATE TABLE NN_parameters (
+                                        id INTEGER PRIMARY KEY,
+                                        topology TEXT NOT NULL,
+                                        input_type TEXT NOT NULL
+)"
+table,agents_old,agents_old,9,"CREATE TABLE ""agents_old"" (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        generation INTEGER NOT NULL,
+                        level INTEGER NOT NULL,
+                        score REAL NOT NULL,
+                        fitness REAL NOT NULL,
+                        NN_parameters INTEGER NOT NULL,
+                        EA_parameters INTEGER NOT NULL,
+                        created_at DATE NOT NULL,
+                        NN_weights TEXT NOT NULL,
+                        FOREIGN KEY (NN_parameters) REFERENCES NN_parameters(id),
+                        FOREIGN KEY (EA_parameters) REFERENCES EA_parameters(id)
+)"
+table,EA_parameters,EA_parameters,8,"CREATE TABLE EA_parameters (
+                                        id INTEGER PRIMARY KEY,
+                                        mutation_rate REAL NOT NULL,
+                                        is_uniform BOOLEAN NOT NULL,
+                                        mutation_step_size REAL NOT NULL,
+                                        elitism_rate REAL NOT NULL,
+                                        randomness_rate REAL NOT NULL,
+                                        population_size INTEGER NOT NULL,
+                                        child_count INTEGER NOT NULL,
+                                        parent_selection TEXT NOT NULL,
+                                        crossover_type TEXT NOT NULL,
+                                        score_evaluation TEXT NOT NULL,
+                                        fitness_calculation TEXT NOT NULL
+)"
+table,runs,runs,1348,"CREATE TABLE ""runs"" (
+                            ID INTEGER PRIMARY KEY AUTOINCREMENT,
+                            level INTEGER NOT NULL,
+                            NN_parameters INTEGER NOT NULL,
+                            EA_parameters INTEGER NOT NULL,
+                            execution_start DATE NOT NULL,
+                            FOREIGN KEY (NN_parameters) REFERENCES NN_parameters(id),
+                            FOREIGN KEY (EA_parameters) REFERENCES EA_parameters(id)
+)"
+table,agents,agents,1349,"CREATE TABLE agents (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        generation INTEGER NOT NULL,
+                        score REAL NOT NULL,
+                        fitness REAL NOT NULL,
+                        run_id INTEGER NOT NULL,
+                        NN_weights TEXT NOT NULL,
+                        FOREIGN KEY (run_id) REFERENCES ""runs""(id)
+)"
+table,test_vis,test_vis,2773,"CREATE TABLE test_vis(
+  generation INT,
+  score REAL,
+  fitness REAL,
+  run_id INT,
+  EA_parameters INT,
+  NN_parameters INT
+)"
