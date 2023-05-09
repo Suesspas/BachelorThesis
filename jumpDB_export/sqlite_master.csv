@@ -1,3 +1,4 @@
+type,name,tbl_name,rootpage,sql
 table,bot_info,bot_info,2,"CREATE TABLE bot_info (
                                         level INT NOT NULL,
                                         generation INT NOT NULL,

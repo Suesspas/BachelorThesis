@@ -1,3 +1,4 @@
+id,topology,input_type
 1,"7,5,3",distances
 2,"7,5,5,3",distances
 3,"7,7,7,3",distances
