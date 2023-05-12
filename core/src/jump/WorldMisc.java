@@ -14,7 +14,8 @@ public abstract class WorldMisc {
     public static final float minWorldHeight = 90f; //def 45f
     public static World world;
     public static final float MAXDIST = new Vector2(0,0).dst(minWorldWidth, minWorldHeight);
-    public static int level = 2;
+
+    public static int level = ConfigManager.getInstance().getLevel();
 
     public static void createWorld() {
 

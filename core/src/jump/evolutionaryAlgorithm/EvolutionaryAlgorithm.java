@@ -1,5 +1,6 @@
 package jump.evolutionaryAlgorithm;
 
+import jump.ConfigManager;
 import jump.WorldMisc;
 import jump.actors.BotActor;
 import jump.actors.GoalActor;
@@ -42,14 +43,9 @@ public class EvolutionaryAlgorithm {
 	public EvolutionaryAlgorithm() {
 
 		//this.bestGenome = this.population.genomes.get(0).bird.net;
-		Properties props = new Properties();
-		try (InputStream inputStream = new FileInputStream("core/src/config.properties")) {
-			props.load(inputStream);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		eaType = Integer.parseInt(props.getProperty("ea.config"));
-		nnType = Integer.parseInt(props.getProperty("nn.config"));
+
+		eaType = ConfigManager.getInstance().getEAconf();
+		nnType =  ConfigManager.getInstance().getNNconf();
 		//TODO figure out when to load WorldMisc.level from config
 		this.generation = 1;
 		EAParametersDAO eaParametersDAO = new EAParametersDAO(eaType);

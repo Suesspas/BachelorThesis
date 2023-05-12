@@ -43,7 +43,7 @@ public class GameStage extends Stage implements ContactListener {
 
     SpriteBatch batch = new SpriteBatch();
     BitmapFont font = new BitmapFont();
-    private static float physicsSpeedup = 1f;
+    private static float physicsSpeedup = ConfigManager.getInstance().getPhysicsSpeedup(); //TODO move to config
     private static int levelTimer;
     private static int maxLevelTimer;
 
