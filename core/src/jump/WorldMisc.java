@@ -7,6 +7,9 @@ import jump.userdata.GoalUserData;
 import jump.userdata.HeroUserData;
 import jump.userdata.PlatformUserData;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public abstract class WorldMisc {
     static final float heroHeight = 0.8f;
     static final float heroWidth = 0.4f;
@@ -16,6 +19,8 @@ public abstract class WorldMisc {
     public static final float MAXDIST = new Vector2(0,0).dst(minWorldWidth, minWorldHeight);
 
     public static int level = ConfigManager.getInstance().getLevel();
+    public static List<Body> botBodies = new ArrayList<Body>();
+    public static final Vector2 spawnCoords = new Vector2(8f,5f);
 
     public static void createWorld() {
 
@@ -45,7 +50,6 @@ public abstract class WorldMisc {
         body.setUserData(new GoalUserData(2*(hx), 2*hy));
         goalShape.dispose();
         return body;
-
     }
 
     public static Body createPlatform(Vector2 pos, float hx, float hy, int platformNumber) {
@@ -74,7 +78,7 @@ public abstract class WorldMisc {
     }
 
     public static Body createHero(Vector2 pos, int botNumber) {
-
+        //TODO instead of createHero every new gen, save popnumber bot bodys and reuse them
         BodyDef hero = new BodyDef();
         hero.type = BodyDef.BodyType.DynamicBody;
         hero.position.set(pos); // new Vector2(8F, 5F) default
@@ -104,10 +108,24 @@ public abstract class WorldMisc {
         if (botNumber < 0){
             body.setUserData(new HeroUserData(2*heroWidth, 2*heroHeight));
         } else {
-            body.setUserData(new BotUserData(2*heroWidth, 2*heroHeight, botNumber));
+            setBotUserData(body, botNumber);
+            botBodies.add(body);
         }
         heroShape.dispose();
         return body;
+    }
+
+    public static void setBotUserData(Body body, int botNumber){
+        body.setUserData(new BotUserData(2*heroWidth, 2*heroHeight, botNumber));
+    }
+
+    public static void resetBotBodies() {
+        for (Body b:
+             botBodies) {
+            b.setTransform(spawnCoords, b.getAngle());
+            b.setAwake(true);
+            //b.setActive(true);
+        }
     }
 
         /*public Body createLeftWall(World world) {

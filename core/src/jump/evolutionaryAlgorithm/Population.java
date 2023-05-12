@@ -1,6 +1,5 @@
 package jump.evolutionaryAlgorithm;
 
-import jump.data.DatabaseConnector;
 import jump.actors.BotActor;
 import jump.neuralNetwork.NeuralNetwork;
 
@@ -44,7 +43,7 @@ public class Population {
 			for (int i = 0; i < max; i++) { //strenge eltern auswahl, keine Wahrscheinlichkeiten für crossover sondern reihenfolge der fitness
 				List<Genotype> children = Genotype.crossOver(this.genomes.get(i), this.genomes.get(max), childCount, mutationRate, mutationStdDev);
 				for (Genotype child: children) {
-					child.setNumber(nextGeneration.size());
+					child.assignBodyNumber(nextGeneration.size());
 					nextGeneration.add(child);
 					if (nextGeneration.size() >= this.genomes.size()) {
 						this.genomes = nextGeneration;

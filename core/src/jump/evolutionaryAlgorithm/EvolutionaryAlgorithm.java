@@ -46,7 +46,6 @@ public class EvolutionaryAlgorithm {
 
 		eaType = ConfigManager.getInstance().getEAconf();
 		nnType =  ConfigManager.getInstance().getNNconf();
-		//TODO figure out when to load WorldMisc.level from config
 		this.generation = 1;
 		EAParametersDAO eaParametersDAO = new EAParametersDAO(eaType);
 		NNParametersDAO nnParametersDAO = new NNParametersDAO(nnType);
@@ -147,7 +146,7 @@ public class EvolutionaryAlgorithm {
 		return closestPlatform;
 	}
 
-	private List<PlatformActor> getXClosestPlatforms(int x, List<PlatformActor> platforms, BotActor bot) {
+	private List<PlatformActor> _getXClosestPlatforms(int x, List<PlatformActor> platforms, BotActor bot) {
 		if (x >= platforms.size()){
 			x = platforms.size();
 			System.err.println("Only " + platforms.size() + " platforms in level");
@@ -165,4 +164,39 @@ public class EvolutionaryAlgorithm {
 		return platformsByDist;
 	}
 
+	private PriorityQueue<PlatformActor> platformQueue;
+	private List<PlatformActor> platformsByDist;
+
+	private List<PlatformActor> getXClosestPlatforms(int x, List<PlatformActor> platforms, BotActor bot) {
+		if (platformQueue == null) {
+			platformQueue = new PriorityQueue<>(x, new Comparator<PlatformActor>() {
+				@Override
+				public int compare(PlatformActor p1, PlatformActor p2) {
+					return Double.compare(bot.distanceTo(p1.getPosition()), bot.distanceTo(p2.getPosition()));
+				}
+			});
+		} else {
+			platformQueue.clear();
+		}
+
+		for (PlatformActor platform : platforms) {
+			double distance = bot.distanceTo(platform.getPosition());
+			if (platformQueue.size() < x || distance < bot.distanceTo(platformQueue.peek().getPosition())) {
+				platformQueue.offer(platform);
+			}
+			if (platformQueue.size() > x) {
+				platformQueue.poll();
+			}
+		}
+
+		if (platformsByDist == null) {
+			platformsByDist = new ArrayList<>(x);
+		} else {
+			platformsByDist.clear();
+		}
+		platformsByDist.addAll(platformQueue);
+		Collections.reverse(platformsByDist);
+
+		return platformsByDist;
+	}
 }

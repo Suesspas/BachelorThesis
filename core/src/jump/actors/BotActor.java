@@ -4,7 +4,6 @@ import com.badlogic.gdx.math.Vector2;
 import jump.WorldMisc;
 import jump.neuralNetwork.NeuralNetwork;
 
-import java.util.LinkedList;
 import java.util.List;
 
 public class BotActor extends HeroActor{
@@ -15,7 +14,6 @@ public class BotActor extends HeroActor{
     private float score;
 
     private boolean reachedGoal;
-    private static final Vector2 spawn = new Vector2(8f,5f);
 
     private static final int numberOfSeenPlatforms = 3;
 
@@ -25,7 +23,7 @@ public class BotActor extends HeroActor{
 
 
     public BotActor(int botNumber, int[] nnTopology) {
-        super(WorldMisc.createHero(spawn, botNumber));
+        super(WorldMisc.createHero(WorldMisc.spawnCoords, botNumber));
         neuralNetwork = new NeuralNetwork(nnTopology); //TODO test different topologies, was (numberOfSeenPlatforms*2)+1,5,3
         jumpTimer = 0;
         isAlive = true;
@@ -35,7 +33,8 @@ public class BotActor extends HeroActor{
     }
 
     public BotActor(NeuralNetwork.FlattenNetwork net, int botNumber) {
-        super(WorldMisc.createHero(spawn, botNumber));
+        //super(WorldMisc.createHero(WorldMisc.spawnCoords, botNumber)); //TODO reuse bodies also anstatt createhero
+        super(WorldMisc.botBodies.get(botNumber));
         neuralNetwork = NeuralNetwork.expand(net);
         jumpTimer = 0;
         isAlive = true;
@@ -91,27 +90,27 @@ public class BotActor extends HeroActor{
         }
     }
 
-    float[] test;
+    private float[] inputVector = new float[7]; // TODO make variable through NN input conf
+
     public void feed2(List<PlatformActor> platformsByDistance, float distanceToGoal) {
         if (platformsByDistance != null && isAlive) {
 
-            test = new float[]{
-                    //1f, //bias, is that needed? or should you add this to NN?
-                    distanceToGoal / WorldMisc.MAXDIST , // alternative distance / GameStage.minWorldWidth
-                    this.distanceTo(platformsByDistance.get(0).getPosition()) / WorldMisc.MAXDIST, //TODO numberofseenplatforms + sind angles sinnvoll?
-                    this.angleTo(platformsByDistance.get(0).getPosition()),
-                    this.distanceTo(platformsByDistance.get(1).getPosition()) / WorldMisc.MAXDIST,
-                    this.angleTo(platformsByDistance.get(1).getPosition()),
-                    this.distanceTo(platformsByDistance.get(2).getPosition()) / WorldMisc.MAXDIST,
-                    this.angleTo(platformsByDistance.get(2).getPosition()),
-            };
+            // set values in inputVector array
+            inputVector[0] = distanceToGoal / WorldMisc.MAXDIST;
+            inputVector[1] = this.distanceTo(platformsByDistance.get(0).getPosition()) / WorldMisc.MAXDIST;
+            inputVector[2] = this.angleTo(platformsByDistance.get(0).getPosition());
+            inputVector[3] = this.distanceTo(platformsByDistance.get(1).getPosition()) / WorldMisc.MAXDIST;
+            inputVector[4] = this.angleTo(platformsByDistance.get(1).getPosition());
+            inputVector[5] = this.distanceTo(platformsByDistance.get(2).getPosition()) / WorldMisc.MAXDIST;
+            inputVector[6] = this.angleTo(platformsByDistance.get(2).getPosition());
 
-            botActions(test);
+            botActions(inputVector); // pass inputVector array to botActions method
         }
     }
 
+    private float[] output = new float[3]; //TODO make outputs variable trough NN conf
     private void botActions(float... inputs) {
-        float[] output = this.getNeuralNetwork().eval(inputs); //TODO outputs in what range?
+        output = this.getNeuralNetwork().eval(inputs); //TODO outputs in what range?
 //        if (this.getUserData().getBotNumber() == 1){
 //            System.out.println("Bot number " + this.getUserData().getBotNumber() + Arrays.toString(inputs));
 //            System.out.println("outputs: " + Arrays.toString(output));
@@ -151,17 +150,21 @@ public class BotActor extends HeroActor{
 
     @Override
     public void landed() {
+        if (jumpTimer > 100){
+            return;
+        }
         super.landed();
         jumpTimer = 2;
     }
 
-    public void setNumber(int botNumber) { //TODO whack
-        body = WorldMisc.createHero(spawn, botNumber);
+    public void assignBodyNumber(int botNumber) { //TODO verify bot bodies are assigned correctly
+        body = WorldMisc.botBodies.get(botNumber);
     }
 
     public boolean isOutOfBounds(float x, float y){
-        return (this.body.getPosition().x > x) || (this.body.getPosition().x < 0)
-                || (this.body.getPosition().y > y) || (this.body.getPosition().y < 0);
+        float p = 10f; //padding so body completely OOB
+        return (this.body.getPosition().x > x + p) || (this.body.getPosition().x < -p)
+                || (this.body.getPosition().y > y + p) || (this.body.getPosition().y < -p);
     }
 
     public void reachedGoal() {

@@ -36,8 +36,7 @@ public class GameStage extends Stage implements ContactListener {
     private HeroActor player;
     private List<BotActor> bots;
     public Boolean right = false, left = false, jump = false;
-    int playerJumpTimer;
-
+    private int playerJumpTimer;
     private Camera camera;
     public Vector3 posCameraDesired;
 
@@ -193,7 +192,7 @@ public class GameStage extends Stage implements ContactListener {
         List<BotActor> deadBots = new ArrayList<>();
 
         //jumptimer and get dead bots
-        for (BotActor b: bots) { //TODO kill bots physics bodies
+        for (BotActor b: bots) {
             b.decrementJumpTimer();
             if(!b.isAlive()){
                 deadBots.add(b);
@@ -205,7 +204,10 @@ public class GameStage extends Stage implements ContactListener {
                 bots.remove(b);
 //            HeroUserData userData = (HeroUserData) b.getBody().getUserData();
 //            userData.setBotNumber(-1);
-                WorldMisc.world.destroyBody(b.getBody());
+                //WorldMisc.world.destroyBody(b.getBody()); //TODO reuse bodies
+                //b.getBody().setActive(false);
+                b.getBody().setAwake(false);
+                b.setAirBorne();
             }
             //update bot numbers
             for (BotActor b : bots) {
@@ -217,7 +219,9 @@ public class GameStage extends Stage implements ContactListener {
 
         if (evolutionaryAlgorithm.populationDead() || levelTimer % maxLevelTimer == maxLevelTimer-1) {//TODO change countdown timer for different levels
             for (BotActor b: bots) {
-                WorldMisc.world.destroyBody(b.getBody());
+                //WorldMisc.world.destroyBody(b.getBody());
+                //b.getBody().setActive(false);
+                b.setAirBorne();
             }
             reset();
         }
@@ -275,17 +279,22 @@ public class GameStage extends Stage implements ContactListener {
     }
 
     private void reset() {
+        WorldMisc.resetBotBodies();
         evolutionaryAlgorithm.evolvePopulation(); //TODO test
         List<Genotype> genomes = evolutionaryAlgorithm.population.genomes;
         for (int i = 0; i < genomes.size(); i++) {
             BotActor bot = evolutionaryAlgorithm.population.genomes.get(i).getBot();
             if (i < bots.size()) {
                 bots.set(i, bot);
-                addActor(bot);
+                //bot.getUserData().setBotNumber(i);
+                WorldMisc.setBotUserData(bot.getBody(), i);
+                addActor(bot); //maybe can be removed?
             } else {
                 bots.add(bot);
+                WorldMisc.setBotUserData(bot.getBody(), bots.size()-1);
                 addActor(bot);
             }
+            bot.setAirBorne();
         }
     }
 
@@ -301,7 +310,6 @@ public class GameStage extends Stage implements ContactListener {
         Fixture b = contact.getFixtureB();
         Body bodyA = a.getBody();
         Body bodyB = b.getBody();
-
         if (BodyMisc.bodyIsHero(bodyA) || BodyMisc.bodyIsHero(bodyB)) return; //TODO zu testzwecken hero noch in code, entfernen oder code unten anpassen
 
         //identifiziere welcher bot kollidiert und führe landed() für denjenigen aus
@@ -337,7 +345,7 @@ public class GameStage extends Stage implements ContactListener {
             playerJumpTimer = 2;
         } else {
             bots.get(botNumber).landed();
-            //System.out.println("bot " + botNumber + " landed");
+            if (botNumber < 10) System.out.println("bot " + botNumber + " landed");
         }
     }
 

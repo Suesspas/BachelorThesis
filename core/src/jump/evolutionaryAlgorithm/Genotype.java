@@ -30,13 +30,13 @@ public class Genotype {
 	}
 
 	public Genotype(NeuralNetwork.FlattenNetwork net, int botNumber) {
+		//TODO
 		this.bot = new BotActor(net, botNumber);
 		this.fitness = 0;
 	}
 
 	public Genotype(Genotype genome, int botNumber) {
-		this.bot = new BotActor(genome.getBot().getNeuralNetwork().flatten(), botNumber);
-		this.fitness = 0;
+		this(genome.getBot().getNeuralNetwork().flatten(), botNumber);
 	}
 
 	public static List<Genotype> crossOver(Genotype geneA, Genotype geneB, int childCount, float mutationRate, float mutationStdDev) {
@@ -59,7 +59,7 @@ public class Genotype {
 		return children;
 	}
 
-	public void setNumber(int botNumber) {
-		this.bot.setNumber(botNumber);
+	public void assignBodyNumber(int botNumber) {
+		this.bot.assignBodyNumber(botNumber);
 	}
 }
