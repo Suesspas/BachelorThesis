@@ -57,6 +57,18 @@ public class ConfigManager {
         return physicsSpeedup;
     }
 
+    public void setEAconf(int EAconf) {
+        this.EAconf = EAconf;
+    }
+
+    public void setNNconf(int NNconf) {
+        this.NNconf = NNconf;
+    }
+
+    public void setLevel(int level) {
+        this.level = level;
+    }
+
     public void saveProperties() throws IOException {
         FileOutputStream output = new FileOutputStream("config.properties");
         properties.store(output, "Modified properties");

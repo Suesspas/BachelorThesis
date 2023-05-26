@@ -59,14 +59,21 @@ public class GameStage extends Stage implements ContactListener {
         setupWorld();
 
         DatabaseConnector.init();
+        setupEA();
+
+        camera = getViewport().getCamera();
+    }
+
+    private void setupEA() {
         evolutionaryAlgorithm = new EvolutionaryAlgorithm();
 
         bots = new ArrayList<>();
         for (Genotype genome: evolutionaryAlgorithm.population.genomes) {
+            genome.assignBodyNumber(bots.size());
             bots.add(genome.getBot());
+            bots.forEach(BotActor::setAirBorne);
         }
-
-        camera = getViewport().getCamera();
+        System.out.println("bots size: " + bots.size());
     }
 
     private void setupWorld() {
@@ -167,7 +174,7 @@ public class GameStage extends Stage implements ContactListener {
     @Override
     public void act(float delta) {
 
-        super.act(delta); //* physicsSpeedup ?
+        super.act(delta * physicsSpeedup); //* physicsSpeedup ?
         doPhysicsStep(delta * physicsSpeedup);
 
         //Player Movement
@@ -218,18 +225,18 @@ public class GameStage extends Stage implements ContactListener {
 
 
         if (evolutionaryAlgorithm.populationDead() || levelTimer % maxLevelTimer == maxLevelTimer-1) {//TODO change countdown timer for different levels
+            reset();
             for (BotActor b: bots) {
                 //WorldMisc.world.destroyBody(b.getBody());
                 //b.getBody().setActive(false);
                 b.setAirBorne();
             }
-            reset();
         }
         levelTimer++;
     }
 
     private void doPhysicsStep(float delta) {
-        float frameTime = Math.min(delta, 0.25f);
+        float frameTime = Math.min(delta, 0.05f); //before 0.25f
         accumulator += frameTime;
         while (accumulator >= frameTime) {
             WorldMisc.world.step(TIME_STEP, 6, 2); //TODO iterations were 8/4, but less may yield better perf
@@ -280,7 +287,11 @@ public class GameStage extends Stage implements ContactListener {
 
     private void reset() {
         WorldMisc.resetBotBodies();
-        evolutionaryAlgorithm.evolvePopulation(); //TODO test
+        if (evolutionaryAlgorithm.generation >= 5){
+            setupEA();
+        } else {
+            evolutionaryAlgorithm.evolvePopulation(); //TODO test
+        }
         List<Genotype> genomes = evolutionaryAlgorithm.population.genomes;
         for (int i = 0; i < genomes.size(); i++) {
             BotActor bot = evolutionaryAlgorithm.population.genomes.get(i).getBot();

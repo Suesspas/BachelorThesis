@@ -18,12 +18,12 @@ public class Population {
 	}
 
 	public void evolve(float elitism, float randomness, float mutationRate, float mutationStdDev, int childCount) {
-		System.out.println("top fitness: " + genomes.get(0).getFitness()
+		/*System.out.println("top fitness: " + genomes.get(0).getFitness()
 				+ ", " + genomes.get(1).getFitness()
 				+ ", " + genomes.get(2).getFitness());
 		System.out.println("top scores: " + genomes.get(0).getBot().getScore()
 				+ ", " + genomes.get(1).getBot().getScore()
-				+ ", " + genomes.get(2).getBot().getScore());
+				+ ", " + genomes.get(2).getBot().getScore());*/
 		List<Genotype> nextGeneration = new ArrayList<Genotype>();
 		int eliteCount = Math.round(elitism*this.genomes.size());
 		for (int i = 0; i < eliteCount; i++) {

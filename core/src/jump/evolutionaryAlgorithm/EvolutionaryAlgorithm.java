@@ -10,9 +10,6 @@ import jump.data.EAParametersDAO;
 import jump.data.NNParametersDAO;
 import jump.neuralNetwork.NeuralNetwork;
 
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.*;
 
 public class EvolutionaryAlgorithm {
@@ -30,7 +27,7 @@ public class EvolutionaryAlgorithm {
 	public int childCount;// = 1;
 
 	private NeuralNetwork bestGenome;
-	private int rundID;
+	private int runID;
 
 
 	public EvolutionaryAlgorithm(List<BotActor> bots) {
@@ -51,7 +48,7 @@ public class EvolutionaryAlgorithm {
 		NNParametersDAO nnParametersDAO = new NNParametersDAO(nnType);
 		int[] nnTopology = nnParametersDAO.getTopologyArray();
 		//TODO save run here
-		rundID = DatabaseConnector.saveRun(WorldMisc.level, nnType, eaType);
+		runID = DatabaseConnector.saveRun(WorldMisc.level, nnType, eaType);
 		this.populationSize = eaParametersDAO.getPopulationSize();
 		this.elitism = eaParametersDAO.getElitismRate();
 		this.mutationRate = eaParametersDAO.getMutationRate();
@@ -101,8 +98,7 @@ public class EvolutionaryAlgorithm {
 	public void evolvePopulation() {
 		this.alive = this.populationSize;
 		this.population.fitnessEvaluation();
-		// TODO change nntype,eatype to runID
-		DatabaseConnector.saveGeneration(this.population, this.generation, this.rundID); //here because fitness is calculated before
+		DatabaseConnector.saveGeneration(this.population, this.generation, this.runID); //here because fitness is calculated before
 		this.population.evolve(this.elitism, this.randomness, this.mutationRate, this.mutationStdDev, this.childCount);
 		this.bestGenome = this.population.genomes.get(0).getBot().getNeuralNetwork();
 		this.generation++;

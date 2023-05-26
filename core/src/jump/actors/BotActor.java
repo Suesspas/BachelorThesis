@@ -19,17 +19,19 @@ public class BotActor extends HeroActor{
 
     private int highestPlatformReached; //TODO a priori platformnummer? oder einfach inkrement bei neuer platform?
 
+    private boolean spawned;
 
 
 
     public BotActor(int botNumber, int[] nnTopology) {
         super(WorldMisc.createHero(WorldMisc.spawnCoords, botNumber));
         neuralNetwork = new NeuralNetwork(nnTopology); //TODO test different topologies, was (numberOfSeenPlatforms*2)+1,5,3
-        jumpTimer = 0;
+        jumpTimer = 15;
         isAlive = true;
         reachedGoal = false;
         score = 0;
         highestPlatformReached = 0;
+        spawned = true;
     }
 
     public BotActor(NeuralNetwork.FlattenNetwork net, int botNumber) {
