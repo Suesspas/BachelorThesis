@@ -32,6 +32,7 @@ public class BotActor extends HeroActor{
         score = 0;
         highestPlatformReached = 0;
         spawned = true;
+        setAirBorne();
     }
 
     public BotActor(NeuralNetwork.FlattenNetwork net, int botNumber) {
@@ -43,6 +44,7 @@ public class BotActor extends HeroActor{
         reachedGoal = false;
         score = 0;
         highestPlatformReached = 0;
+        setAirBorne();
     }
 
     public void updateHighestPlatform(int platformNumber){
@@ -136,6 +138,7 @@ public class BotActor extends HeroActor{
         }
         super.jump();
         jumpTimer = 15;
+        setAirBorne();
     }
 
     public void decrementJumpTimer(){

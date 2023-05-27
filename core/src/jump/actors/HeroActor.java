@@ -75,7 +75,7 @@ public class HeroActor extends GameActors {
     }
 
     public void jump() {
-        if(!jumping && !dodging) {
+        if(!jumping && !dodging && land) {
             body.applyLinearImpulse(getUserData().getJumpingImpulse(), body.getWorldCenter(), true);
             //setAirBorne(); //nicht mehr nötig weil check auf endcontact
         }
