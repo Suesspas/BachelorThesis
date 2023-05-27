@@ -20,10 +20,13 @@ public class HeroActor extends GameActors {
     private Vector2 heroPosition;
     private Timer timer1 = new Timer();
 
+    private boolean spawned;
+
 
     public HeroActor(Body body) {
         super(body);
         movingLinearImpulse = new Vector2();
+        spawned = true;
     }
 
     public HeroUserData getUserData() {
@@ -75,7 +78,7 @@ public class HeroActor extends GameActors {
     }
 
     public void jump() {
-        if(!jumping && !dodging && land) {
+        if(!jumping && !dodging && land && !spawned) {
             body.applyLinearImpulse(getUserData().getJumpingImpulse(), body.getWorldCenter(), true);
             //setAirBorne(); //nicht mehr nötig weil check auf endcontact
         }
@@ -89,6 +92,7 @@ public class HeroActor extends GameActors {
     public void landed() {
         jumping = false;
         land = true;
+        spawned = false;
     }
 
     public void dodge() {

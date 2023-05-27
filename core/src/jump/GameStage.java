@@ -349,8 +349,8 @@ public class GameStage extends Stage implements ContactListener {
         }
     }
 
-    private void landed(Body bodyA) {
-        int botNumber = getBotNumber(bodyA);
+    private void landed(Body body) {
+        int botNumber = getBotNumber(body);
         if (botNumber < 0){
             player.landed();
             playerJumpTimer = 2;

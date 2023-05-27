@@ -19,7 +19,6 @@ public class BotActor extends HeroActor{
 
     private int highestPlatformReached; //TODO a priori platformnummer? oder einfach inkrement bei neuer platform?
 
-    private boolean spawned;
 
 
 
@@ -31,7 +30,6 @@ public class BotActor extends HeroActor{
         reachedGoal = false;
         score = 0;
         highestPlatformReached = 0;
-        spawned = true;
         setAirBorne();
     }
 
