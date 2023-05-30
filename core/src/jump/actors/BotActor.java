@@ -105,6 +105,7 @@ public class BotActor extends HeroActor{
             inputVector[4] = this.angleTo(platformsByDistance.get(1).getPosition());
             inputVector[5] = this.distanceTo(platformsByDistance.get(2).getPosition()) / WorldMisc.MAXDIST;
             inputVector[6] = this.angleTo(platformsByDistance.get(2).getPosition());
+            //inputVector[7] = 1; //bias
 
             botActions(inputVector); // pass inputVector array to botActions method
         }

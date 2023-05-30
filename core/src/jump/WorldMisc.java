@@ -109,14 +109,13 @@ public abstract class WorldMisc {
             body.setUserData(new HeroUserData(2*heroWidth, 2*heroHeight));
         } else {
             setBotUserData(body, botNumber);
-            if (botBodies.size() < botNumber){
+            if (botBodies.size() <= botNumber){
                 botBodies.add(body);
-            }else {
+            } else {
                 botBodies.set(botNumber, body);
             }
         }
         heroShape.dispose();
-
         return body;
     }
 
