@@ -38,7 +38,13 @@ public class Population {
 			nextGeneration.add(new Genotype(net, nextGeneration.size()));
 		}
 		// Pool selection
-		int max = 0;
+		//TODO change selection based on parentSelection parameter
+		this.genomes = selectNextGen(mutationRate, mutationStdDev, childCount, nextGeneration);
+	}
+
+	private List<Genotype> selectNextGen(float mutationRate, float mutationStdDev, int childCount, List<Genotype> nextGeneration) {
+		int max = 1;
+		outerloop:
 		while (true) {
 			for (int i = 0; i < max; i++) { //strenge eltern auswahl, keine Wahrscheinlichkeiten für crossover sondern reihenfolge der fitness
 				List<Genotype> children = Genotype.crossOver(this.genomes.get(i), this.genomes.get(max), childCount, mutationRate, mutationStdDev);
@@ -46,15 +52,65 @@ public class Population {
 					child.assignBodyNumber(nextGeneration.size());
 					nextGeneration.add(child);
 					if (nextGeneration.size() >= this.genomes.size()) {
-						this.genomes = nextGeneration;
-						return;
+						break outerloop;
 					}
 				}
 			}
 			max++;
 			max = max >= this.genomes.size() ? 0 : max;
 		}
+		return nextGeneration;
 	}
+
+	private List<Genotype> selectNextGen2(float mutationRate, float mutationStdDev, int childCount, List<Genotype> nextGeneration) {
+		outerloop:
+		while (true){
+			List<Genotype> parents = randomParentSelection();
+			List<Genotype> children = Genotype.crossOver(parents.get(0), parents.get(1), childCount, mutationRate, mutationStdDev);
+			for (Genotype child: children) {
+				child.assignBodyNumber(nextGeneration.size());
+				nextGeneration.add(child);
+				if (nextGeneration.size() >= this.genomes.size()) {
+					break outerloop;
+				}
+			}
+		}
+		return nextGeneration;
+	}
+
+	private List<Genotype> randomParentSelection() {
+		double rand1 = Math.random();
+		double rand2 = Math.random();
+		Genotype parent1 = null;
+		Genotype parent2 = null;
+		boolean parent1Set = false;
+		boolean parent2Set = false;
+
+		for (Genotype genome : this.genomes) {
+			rand1 -= genome.getFitness();
+			rand2 -= genome.getFitness();
+
+			if (!parent1Set && rand1 < 0) {
+				parent1 = genome;
+				parent1Set = true;
+			}
+			if (!parent2Set && rand2 < 0) {
+				parent2 = genome;
+				parent2Set = true;
+			}
+
+			if (parent1Set && parent2Set) {
+				break;
+			}
+		}
+
+		List<Genotype> selectedParents = new ArrayList<>();
+		selectedParents.add(parent1);
+		selectedParents.add(parent2);
+		return selectedParents;
+	}
+
+
 
 	public void fitnessEvaluation() {
 		this.normalFitnessDistribution();
