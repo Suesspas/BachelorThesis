@@ -5,6 +5,7 @@ import jump.neuralNetwork.NeuralNetwork;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 public class Genotype {
 
@@ -39,7 +40,7 @@ public class Genotype {
 		this(genome.getBot().getNeuralNetwork().flatten(), botNumber);
 	}
 
-	public static List<Genotype> crossOver(Genotype geneA, Genotype geneB, int childCount, float mutationRate, float mutationStdDev) {
+	public static List<Genotype> crossOver(Genotype geneA, Genotype geneB, int childCount, float mutationRate, float mutationRange, float mutationStep, boolean isUniform) {
 		List<Genotype> children = new ArrayList<Genotype>();
 		for (int ch = 0; ch < childCount; ch++) {
 			NeuralNetwork.FlattenNetwork childNet = geneA.bot.getNeuralNetwork().flatten();
@@ -49,14 +50,35 @@ public class Genotype {
 					childNet.weights.set(i, parentNet.weights.get(i));
 				}
 			}
-			for (int i = 0; i < childNet.weights.size(); i++) {
-				if (Math.random() <= mutationRate) {
-					childNet.weights.set(i, (float) Math.random()*2*mutationStdDev - mutationStdDev); //TODO schauen, ob der Wertebereich sinvoll ist
-				}
+			if (isUniform){
+				uniformMutation(mutationRate, mutationRange, childNet);
+			} else {
+				nonuniformMutation(mutationRate, mutationRange, mutationStep, childNet);
 			}
 			children.add(new Genotype(childNet, 0)); //default bot number 0, is set after method call
 		}
 		return children;
+	}
+
+	private static void nonuniformMutation(float mutationRate, float mutationRange, float mutationStep, NeuralNetwork.FlattenNetwork childNet) {
+		Random random = new Random();
+		for (int i = 0; i < childNet.weights.size(); i++) {
+			if (Math.random() <= mutationRate) {
+				float currentValue = childNet.weights.get(i);
+				float randomValue = (float) random.nextGaussian() * mutationStep;
+				float newValue = currentValue + randomValue;
+				newValue = Math.max(-mutationRange, Math.min(mutationRange, newValue));
+				childNet.weights.set(i, newValue);
+			}
+		}
+	}
+
+	private static void uniformMutation(float mutationRate, float mutationRange, NeuralNetwork.FlattenNetwork childNet) {
+		for (int i = 0; i < childNet.weights.size(); i++) {
+			if (Math.random() <= mutationRate) {
+				childNet.weights.set(i, (float) Math.random()*2* mutationRange - mutationRange); //TODO schauen, ob der Wertebereich sinvoll ist
+			}
+		}
 	}
 
 	public void assignBodyNumber(int botNumber) {

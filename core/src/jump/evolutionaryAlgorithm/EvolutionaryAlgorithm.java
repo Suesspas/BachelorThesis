@@ -22,12 +22,14 @@ public class EvolutionaryAlgorithm {
 	public int populationSize; //= 100;
 	public float elitism;// = 0.2f;
 	public float mutationRate;// = 0.1f; //old default values
-	public float mutationStdDev;// = 0f;
+	public float mutationStep;
+	public float mutationRange;// = 0f; // if mutation uniform --> value in [-mRange, mRange]
 	public float randomness;// = 0.2f;
 	public int childCount;// = 1;
 
 	private NeuralNetwork bestGenome;
 	private int runID;
+	private boolean isUniform;
 
 
 	public EvolutionaryAlgorithm(List<BotActor> bots) {
@@ -47,14 +49,15 @@ public class EvolutionaryAlgorithm {
 		EAParametersDAO eaParametersDAO = new EAParametersDAO(eaType);
 		NNParametersDAO nnParametersDAO = new NNParametersDAO(nnType);
 		int[] nnTopology = nnParametersDAO.getTopologyArray();
-		//TODO save run here
 		runID = DatabaseConnector.saveRun(WorldMisc.level, nnType, eaType);
 		this.populationSize = eaParametersDAO.getPopulationSize();
 		this.elitism = eaParametersDAO.getElitismRate();
 		this.mutationRate = eaParametersDAO.getMutationRate();
-		this.mutationStdDev = 0f;
+		this.mutationStep = eaParametersDAO.getMutationStepSize();
+		this.mutationRange = 1f; //uniform mutation makes NN weights in [-1,1]
 		this.randomness = eaParametersDAO.getRandomnessRate();
 		this.childCount = eaParametersDAO.getChildCount();
+		this.isUniform = eaParametersDAO.isUniform();
 
 		List<BotActor> bots = new ArrayList<>();
 		System.out.println("nnTopology is " + Arrays.toString(nnTopology));
@@ -84,7 +87,6 @@ public class EvolutionaryAlgorithm {
 
 //				bot.feed(closestPlatform, bot.distanceTo(goal.getPosition()));
 				bot.feed2(platformsByDist, bot.distanceTo(goal.getPosition()));
-
 				bot.update(goal, levelTimer);
 				if (bot.isOutOfBounds(WorldMisc.minWorldWidth, WorldMisc.minWorldHeight)) {
 					bot.dead();
@@ -99,7 +101,7 @@ public class EvolutionaryAlgorithm {
 		this.alive = this.populationSize;
 		this.population.fitnessEvaluation();
 		DatabaseConnector.saveGeneration(this.population, this.generation, this.runID); //here because fitness is calculated before
-		this.population.evolve(this.elitism, this.randomness, this.mutationRate, this.mutationStdDev, this.childCount);
+		this.population.evolve(this.elitism, this.randomness, this.mutationRate, this.mutationRange, this.childCount, this.mutationStep, this.isUniform);
 		this.bestGenome = this.population.genomes.get(0).getBot().getNeuralNetwork();
 		this.generation++;
 	}

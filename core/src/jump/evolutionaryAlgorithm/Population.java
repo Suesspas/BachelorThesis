@@ -17,7 +17,7 @@ public class Population {
 		}
 	}
 
-	public void evolve(float elitism, float randomness, float mutationRate, float mutationStdDev, int childCount) {
+	public void evolve(float elitism, float randomness, float mutationRate, float mutationRange, int childCount, float mutationStep, boolean isUniform) {
 		/*System.out.println("top fitness: " + genomes.get(0).getFitness()
 				+ ", " + genomes.get(1).getFitness()
 				+ ", " + genomes.get(2).getFitness());
@@ -39,15 +39,15 @@ public class Population {
 		}
 		// Pool selection
 		//TODO change selection based on parentSelection parameter
-		this.genomes = selectNextGen(mutationRate, mutationStdDev, childCount, nextGeneration);
+		this.genomes = selectNextGen(mutationRate, mutationRange, childCount, mutationStep, nextGeneration, isUniform);
 	}
 
-	private List<Genotype> selectNextGen(float mutationRate, float mutationStdDev, int childCount, List<Genotype> nextGeneration) {
+	private List<Genotype> selectNextGen(float mutationRate, float mutationRange, int childCount, float mutationStep, List<Genotype> nextGeneration, boolean isUniform) {
 		int max = 1;
 		outerloop:
 		while (true) {
 			for (int i = 0; i < max; i++) { //strenge eltern auswahl, keine Wahrscheinlichkeiten für crossover sondern reihenfolge der fitness
-				List<Genotype> children = Genotype.crossOver(this.genomes.get(i), this.genomes.get(max), childCount, mutationRate, mutationStdDev);
+				List<Genotype> children = Genotype.crossOver(this.genomes.get(i), this.genomes.get(max), childCount, mutationRate, mutationRange, mutationStep, isUniform);
 				for (Genotype child: children) {
 					child.assignBodyNumber(nextGeneration.size());
 					nextGeneration.add(child);
@@ -62,11 +62,11 @@ public class Population {
 		return nextGeneration;
 	}
 
-	private List<Genotype> selectNextGen2(float mutationRate, float mutationStdDev, int childCount, List<Genotype> nextGeneration) {
+	private List<Genotype> selectNextGen2(float mutationRate, float mutationStdDev, int childCount, float mutationStep, List<Genotype> nextGeneration, boolean isUniform) {
 		outerloop:
 		while (true){
 			List<Genotype> parents = randomParentSelection();
-			List<Genotype> children = Genotype.crossOver(parents.get(0), parents.get(1), childCount, mutationRate, mutationStdDev);
+			List<Genotype> children = Genotype.crossOver(parents.get(0), parents.get(1), childCount, mutationRate, mutationStdDev, mutationStep, isUniform);
 			for (Genotype child: children) {
 				child.assignBodyNumber(nextGeneration.size());
 				nextGeneration.add(child);
