@@ -30,6 +30,10 @@ public class EvolutionaryAlgorithm {
 	private NeuralNetwork bestGenome;
 	private int runID;
 	private boolean isUniform;
+	private String parentSelection;
+	private String crossoverType;
+	private String scoreEvaluation;
+	private String fitnessCalculation;
 
 
 	public EvolutionaryAlgorithm(List<BotActor> bots) {
@@ -58,11 +62,15 @@ public class EvolutionaryAlgorithm {
 		this.randomness = eaParametersDAO.getRandomnessRate();
 		this.childCount = eaParametersDAO.getChildCount();
 		this.isUniform = eaParametersDAO.isUniform();
+		this.parentSelection = eaParametersDAO.getParentSelection();
+		this.crossoverType = eaParametersDAO.getCrossoverType();
+		this.fitnessCalculation = eaParametersDAO.getFitnessCalculation();
 
+		this.scoreEvaluation = eaParametersDAO.getScoreEvaluation();
 		List<BotActor> bots = new ArrayList<>();
 		System.out.println("nnTopology is " + Arrays.toString(nnTopology));
 		for (int i = 0; i < populationSize; i++){
-			bots.add(new BotActor(i, nnTopology));
+			bots.add(new BotActor(i, nnTopology, this.scoreEvaluation));
 		}
 		this.population = new Population(bots);
 		this.alive = bots.size();
@@ -99,9 +107,10 @@ public class EvolutionaryAlgorithm {
 
 	public void evolvePopulation() {
 		this.alive = this.populationSize;
-		this.population.fitnessEvaluation();
+		this.population.fitnessEvaluation(this.fitnessCalculation);
 		DatabaseConnector.saveGeneration(this.population, this.generation, this.runID); //here because fitness is calculated before
-		this.population.evolve(this.elitism, this.randomness, this.mutationRate, this.mutationRange, this.childCount, this.mutationStep, this.isUniform);
+		this.population.evolve(this.elitism, this.randomness, this.mutationRate, this.mutationRange, this.childCount,
+				this.mutationStep, this.isUniform, this.parentSelection, this.crossoverType, this.scoreEvaluation);
 		this.bestGenome = this.population.genomes.get(0).getBot().getNeuralNetwork();
 		this.generation++;
 	}
