@@ -173,6 +173,10 @@ public class BotActor extends HeroActor{
         return isAlive;
     }
 
+    public void setAlive() {
+       isAlive = true;
+    }
+
     public void dead() {
         isAlive = false;
     }

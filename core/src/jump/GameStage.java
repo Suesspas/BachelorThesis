@@ -307,6 +307,7 @@ public class GameStage extends Stage implements ContactListener {
                 addActor(bot);
             }
             bot.setAirBorne();
+            bot.setAlive();
         }
     }
 
