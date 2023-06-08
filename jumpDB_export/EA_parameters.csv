@@ -1,3 +1,8 @@
-id,mutation_rate,is_uniform,mutation_step_size,elitism_rate,randomness_rate,population_size,child_count,parent_selection,crossover_type,score_evaluation,fitness_calculation
 1,0.1,1,0,0.2,0.2,100,1,std,std,std,std
 2,0.1,1,0,0.2,0.2,200,1,std,std,std,std
+3,0.2,1,0,0.2,0.2,100,1,std,std,std,std
+4,0.1,1,0,0.2,0.2,100,1,std,none,std,std
+5,0,1,0,0.2,0.2,100,1,std,std,std,std
+6,0.1,1,0,0,0.2,100,1,std,std,std,std
+7,0.1,1,0,0.2,0,100,1,std,std,std,std
+8,0.1,1,0,0.2,0.2,50,1,std,std,std,std
