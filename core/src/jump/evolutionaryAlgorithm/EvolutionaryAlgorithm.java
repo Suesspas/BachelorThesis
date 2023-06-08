@@ -22,12 +22,19 @@ public class EvolutionaryAlgorithm {
 	public int populationSize; //= 100;
 	public float elitism;// = 0.2f;
 	public float mutationRate;// = 0.1f; //old default values
-	public float mutationStdDev;// = 0f;
+	public float mutationStep;
+	public float mutationRange;// = 0f; // if mutation uniform --> value in [-mRange, mRange]
 	public float randomness;// = 0.2f;
 	public int childCount;// = 1;
 
 	private NeuralNetwork bestGenome;
 	private int runID;
+	private boolean isUniform;
+	private String parentSelection;
+	private String crossoverType;
+	private String scoreEvaluation;
+	private String fitnessCalculation;
+	private String NN_input;
 
 
 	public EvolutionaryAlgorithm(List<BotActor> bots) {
@@ -37,29 +44,39 @@ public class EvolutionaryAlgorithm {
 		this.generation = 1;
 	}
 
-	public EvolutionaryAlgorithm() {
+	public EvolutionaryAlgorithm(boolean firstSetup) {
 
 		//this.bestGenome = this.population.genomes.get(0).bird.net;
 
-		eaType = ConfigManager.getInstance().getEAconf();
-		nnType =  ConfigManager.getInstance().getNNconf();
+		eaType = ConfigManager.getInstance().getCurrentEAconf();
+		nnType =  ConfigManager.getInstance().getCurrentNNconf();
 		this.generation = 1;
 		EAParametersDAO eaParametersDAO = new EAParametersDAO(eaType);
 		NNParametersDAO nnParametersDAO = new NNParametersDAO(nnType);
 		int[] nnTopology = nnParametersDAO.getTopologyArray();
-		//TODO save run here
 		runID = DatabaseConnector.saveRun(WorldMisc.level, nnType, eaType);
 		this.populationSize = eaParametersDAO.getPopulationSize();
 		this.elitism = eaParametersDAO.getElitismRate();
 		this.mutationRate = eaParametersDAO.getMutationRate();
-		this.mutationStdDev = 0f;
+		this.mutationStep = eaParametersDAO.getMutationStepSize();
+		this.mutationRange = 1f; //uniform mutation makes NN weights in [-1,1]
 		this.randomness = eaParametersDAO.getRandomnessRate();
 		this.childCount = eaParametersDAO.getChildCount();
+		this.isUniform = eaParametersDAO.isUniform();
+		this.parentSelection = eaParametersDAO.getParentSelection();
+		this.crossoverType = eaParametersDAO.getCrossoverType();
+		this.fitnessCalculation = eaParametersDAO.getFitnessCalculation();
+		this.NN_input = nnParametersDAO.getInputType();
 
+		this.scoreEvaluation = eaParametersDAO.getScoreEvaluation();
 		List<BotActor> bots = new ArrayList<>();
 		System.out.println("nnTopology is " + Arrays.toString(nnTopology));
 		for (int i = 0; i < populationSize; i++){
-			bots.add(new BotActor(i, nnTopology));
+			if (firstSetup){
+				bots.add(new BotActor(i, nnTopology, this.scoreEvaluation));
+			} else {
+				bots.add(new BotActor(i, nnTopology, this.scoreEvaluation, false));
+			}
 		}
 		this.population = new Population(bots);
 		this.alive = bots.size();
@@ -83,7 +100,13 @@ public class EvolutionaryAlgorithm {
 //				}
 
 //				bot.feed(closestPlatform, bot.distanceTo(goal.getPosition()));
-				bot.feed2(platformsByDist, bot.distanceTo(goal.getPosition()));
+				if (NN_input.equals("distances")){
+					bot.feedDistances(platformsByDist, bot.distanceTo(goal.getPosition()));
+				} else if (NN_input.equals("positions")) {
+					bot.feedPositions(platformsByDist.get(0), bot.distanceTo(goal.getPosition()));
+				} else {
+					throw new RuntimeException("invalid NN input parameter");
+				}
 
 				bot.update(goal, levelTimer);
 				if (bot.isOutOfBounds(WorldMisc.minWorldWidth, WorldMisc.minWorldHeight)) {
@@ -97,9 +120,10 @@ public class EvolutionaryAlgorithm {
 
 	public void evolvePopulation() {
 		this.alive = this.populationSize;
-		this.population.fitnessEvaluation();
+		this.population.fitnessEvaluation(this.fitnessCalculation);
 		DatabaseConnector.saveGeneration(this.population, this.generation, this.runID); //here because fitness is calculated before
-		this.population.evolve(this.elitism, this.randomness, this.mutationRate, this.mutationStdDev, this.childCount);
+		this.population.evolve(this.elitism, this.randomness, this.mutationRate, this.mutationRange, this.childCount,
+				this.mutationStep, this.isUniform, this.parentSelection, this.crossoverType, this.scoreEvaluation);
 		this.bestGenome = this.population.genomes.get(0).getBot().getNeuralNetwork();
 		this.generation++;
 	}

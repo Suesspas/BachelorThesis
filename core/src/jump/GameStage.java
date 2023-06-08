@@ -59,13 +59,13 @@ public class GameStage extends Stage implements ContactListener {
         setupWorld();
 
         DatabaseConnector.init();
-        setupEA();
+        setupEA(true);
 
         camera = getViewport().getCamera();
     }
 
-    private void setupEA() {
-        evolutionaryAlgorithm = new EvolutionaryAlgorithm();
+    private void setupEA(boolean firstSetup) {
+        evolutionaryAlgorithm = new EvolutionaryAlgorithm(firstSetup);
 
         bots = new ArrayList<>();
         for (Genotype genome: evolutionaryAlgorithm.population.genomes) {
@@ -287,8 +287,9 @@ public class GameStage extends Stage implements ContactListener {
 
     private void reset() {
         WorldMisc.resetBotBodies();
-        if (evolutionaryAlgorithm.generation >= 5){
-            setupEA();
+        if (evolutionaryAlgorithm.generation >= ConfigManager.getInstance().getMaxGen()){
+            ConfigManager.getInstance().updateConfigProps();
+            setupEA(false);
         } else {
             evolutionaryAlgorithm.evolvePopulation(); //TODO test
         }
@@ -356,7 +357,7 @@ public class GameStage extends Stage implements ContactListener {
             playerJumpTimer = 2;
         } else {
             bots.get(botNumber).landed();
-            if (botNumber < 10) System.out.println("bot " + botNumber + " landed");
+            //if (botNumber < 10) System.out.println("bot " + botNumber + " landed");
         }
     }
 

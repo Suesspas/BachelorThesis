@@ -16,24 +16,36 @@ public class BotActor extends HeroActor{
     private boolean reachedGoal;
 
     private static final int numberOfSeenPlatforms = 3;
-
     private int highestPlatformReached; //TODO a priori platformnummer? oder einfach inkrement bei neuer platform?
+    String scoreEvaluation;
 
 
 
-
-    public BotActor(int botNumber, int[] nnTopology) {
-        super(WorldMisc.createHero(WorldMisc.spawnCoords, botNumber));
+    public BotActor(int botNumber, int[] nnTopology, String scoreEvaluation) {
+        super(WorldMisc.createHero(WorldMisc.spawnCoords, botNumber)); //TODO BUG new bodies are created at EA reset (may also be jump cause)
         neuralNetwork = new NeuralNetwork(nnTopology); //TODO test different topologies, was (numberOfSeenPlatforms*2)+1,5,3
         jumpTimer = 15;
         isAlive = true;
         reachedGoal = false;
         score = 0;
         highestPlatformReached = 0;
+        this.scoreEvaluation = scoreEvaluation;
         setAirBorne();
     }
+    public BotActor(int botNumber, int[] nnTopology, String scoreEvaluation, boolean firstSetup) {
+        super(WorldMisc.botBodies.get(botNumber));
+        neuralNetwork = new NeuralNetwork(nnTopology);
+        jumpTimer = 15;
+        isAlive = true;
+        reachedGoal = false;
+        score = 0;
+        highestPlatformReached = 0;
+        this.scoreEvaluation = scoreEvaluation;
+        setAirBorne();
+        if (firstSetup) throw new RuntimeException("should not be first setup");
+    }
 
-    public BotActor(NeuralNetwork.FlattenNetwork net, int botNumber) {
+    public BotActor(NeuralNetwork.FlattenNetwork net, int botNumber, String scoreEvaluation) {
         //super(WorldMisc.createHero(WorldMisc.spawnCoords, botNumber)); //TODO reuse bodies also anstatt createhero
         super(WorldMisc.botBodies.get(botNumber));
         neuralNetwork = NeuralNetwork.expand(net);
@@ -42,6 +54,7 @@ public class BotActor extends HeroActor{
         reachedGoal = false;
         score = 0;
         highestPlatformReached = 0;
+        this.scoreEvaluation = scoreEvaluation;
         setAirBorne();
     }
 
@@ -54,8 +67,16 @@ public class BotActor extends HeroActor{
     }
 
     private float scoreCalc(GoalActor goal, int aliveTime) { //TODO alivetime sinvoll? + fitness value tuning
-        float goalDistScore = (reachedGoal ? 1000 : 100) / (1 + distanceTo(goal.body.getPosition()));
-        return goalDistScore + Math.min(highestPlatformReached, 10); //encourage reaching new platforms to a certain degree (only first x platforms reached)
+        if (this.scoreEvaluation.equals("std")){
+            float goalDistScore = (reachedGoal ? 1000 : 100) / (1 + distanceTo(goal.body.getPosition()));
+            return goalDistScore + Math.min(highestPlatformReached, 10); //encourage reaching new platforms to a certain degree (only first x platforms reached)
+
+        } else if (this.scoreEvaluation.equals("nogoal")){
+            float goalDistScore = (1 + distanceTo(goal.body.getPosition()));
+            return goalDistScore + Math.min(highestPlatformReached, 10);
+        } else {
+            throw new RuntimeException("no valid parameter for score calculation");
+        }
     }
 
     public float distanceTo(Vector2 target){
@@ -75,7 +96,7 @@ public class BotActor extends HeroActor{
         return neuralNetwork;
     }
 
-    public void feed(PlatformActor closestPlatform, float distanceToGoal) { //TODO inputs in [-1,1]
+    public void feedPositions(PlatformActor closestPlatform, float distanceToGoal) { //TODO inputs in [-1,1]
         if (closestPlatform != null && isAlive) {
 
             float[] inputs = {
@@ -94,7 +115,7 @@ public class BotActor extends HeroActor{
 
     private float[] inputVector = new float[7]; // TODO make variable through NN input conf
 
-    public void feed2(List<PlatformActor> platformsByDistance, float distanceToGoal) {
+    public void feedDistances(List<PlatformActor> platformsByDistance, float distanceToGoal) {
         if (platformsByDistance != null && isAlive) {
 
             // set values in inputVector array

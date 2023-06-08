@@ -18,7 +18,7 @@ public abstract class WorldMisc {
     public static World world;
     public static final float MAXDIST = new Vector2(0,0).dst(minWorldWidth, minWorldHeight);
 
-    public static int level = ConfigManager.getInstance().getLevel();
+    public static int level = ConfigManager.getInstance().getCurrentLevel();
     public static List<Body> botBodies = new ArrayList<Body>();
     public static final Vector2 spawnCoords = new Vector2(8f,5f);
 
