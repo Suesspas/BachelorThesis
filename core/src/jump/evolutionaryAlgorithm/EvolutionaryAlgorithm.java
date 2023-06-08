@@ -103,7 +103,7 @@ public class EvolutionaryAlgorithm {
 				if (NN_input.equals("distances")){
 					bot.feedDistances(platformsByDist, bot.distanceTo(goal.getPosition()));
 				} else if (NN_input.equals("positions")) {
-					bot.feedPositions(platformsByDist.get(0), bot.distanceTo(goal.getPosition()));
+					bot.feedPositions(platformsByDist, bot.distanceTo(goal.getPosition()));
 				} else {
 					throw new RuntimeException("invalid NN input parameter");
 				}

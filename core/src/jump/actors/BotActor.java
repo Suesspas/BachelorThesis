@@ -96,7 +96,9 @@ public class BotActor extends HeroActor{
         return neuralNetwork;
     }
 
-    public void feedPositions(PlatformActor closestPlatform, float distanceToGoal) { //TODO inputs in [-1,1]
+    public void feedPositions(List<PlatformActor> platformsByDistance, float distanceToGoal) { //TODO inputs in [-1,1]
+        PlatformActor closestPlatform = platformsByDistance.get(0);
+        PlatformActor secondPlatform = platformsByDistance.get(1);
         if (closestPlatform != null && isAlive) {
 
             float[] inputs = {
@@ -106,6 +108,8 @@ public class BotActor extends HeroActor{
                     this.body.getPosition().y / WorldMisc.minWorldHeight,
                     closestPlatform.getX() / WorldMisc.minWorldWidth,
                     closestPlatform.getY() / WorldMisc.minWorldHeight,
+                    secondPlatform.getX() / WorldMisc.minWorldWidth,
+                    secondPlatform.getY() / WorldMisc.minWorldHeight,
             };
 
             botActions(inputs);

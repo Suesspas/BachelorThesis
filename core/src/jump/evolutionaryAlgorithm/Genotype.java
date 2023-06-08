@@ -46,13 +46,13 @@ public class Genotype {
 		for (int ch = 0; ch < childCount; ch++) {
 			NeuralNetwork.FlattenNetwork childNet = geneA.bot.getNeuralNetwork().flatten();
 			NeuralNetwork.FlattenNetwork parentNet = geneB.bot.getNeuralNetwork().flatten();
-			if (crossoverType.equals("std")){ //std ist discrete crossover mit 50/50 chance für gene einer der eltern
+			if (crossoverType.equals("discrete")){ //std ist discrete crossover mit 50/50 chance für gene einer der eltern
 				for (int i = 0; i < childNet.weights.size(); i++) {
 					if (Math.random() <= 0.5) {
 						childNet.weights.set(i, parentNet.weights.get(i));
 					}
 				}
-			} else if (crossoverType.equals("arith")){ //arithmetischer crossover mit avg value aller genes
+			} else if (crossoverType.equals("arithmetic")){ //arithmetischer crossover mit avg value aller genes
 				for (int i = 0; i < childNet.weights.size(); i++) {
 					if (Math.random() <= 0.5) {
 						childNet.weights.set(i, (parentNet.weights.get(i) + childNet.weights.get(i)) / 2);

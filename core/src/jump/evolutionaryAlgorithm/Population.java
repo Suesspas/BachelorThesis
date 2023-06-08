@@ -40,7 +40,7 @@ public class Population {
 		}
 		// Pool selection
 		//TODO change selection based on parentSelection parameter
-		if (parentSelection.equals("std")){
+		if (parentSelection.equals("roulette")){
 			this.genomes = randomSelectNextGen(mutationRate, mutationRange, childCount, mutationStep, nextGeneration,
 					isUniform, scoreEvaluation, crossoverType);
 		} else if (parentSelection.equals("rank")){
@@ -129,7 +129,7 @@ public class Population {
 
 
 	public void fitnessEvaluation(String fitnessCalculation) {
-		if (fitnessCalculation.equals("std")){
+		if (fitnessCalculation.equals("weightedSum")){
 			this.weightedSumFitnessDistribution();
 		} else if (fitnessCalculation.equals("other")){
 			//other fitness calc
