@@ -70,6 +70,7 @@ public class EvolutionaryAlgorithm {
 
 		this.scoreEvaluation = eaParametersDAO.getScoreEvaluation();
 		List<BotActor> bots = new ArrayList<>();
+		//System.out.println("EA conf #" + eaType + ", NN conf #" + nnType);
 		System.out.println("nnTopology is " + Arrays.toString(nnTopology));
 		for (int i = 0; i < populationSize; i++){
 			if (firstSetup){
@@ -82,7 +83,7 @@ public class EvolutionaryAlgorithm {
 		this.alive = bots.size();
 	}
 
-	public void updatePopulation(List<PlatformActor> platforms, GoalActor goal, int levelTimer) {
+	public void updatePopulation(List<PlatformActor> platforms, GoalActor goal, int aliveTime) {
 		for (Genotype genome: this.population.genomes) {
 			BotActor bot = genome.getBot();
 			if (bot.isAlive()) {
@@ -108,7 +109,7 @@ public class EvolutionaryAlgorithm {
 					throw new RuntimeException("invalid NN input parameter");
 				}
 
-				bot.update(goal, levelTimer);
+				bot.update(goal, aliveTime);
 				if (bot.isOutOfBounds(WorldMisc.minWorldWidth, WorldMisc.minWorldHeight)) {
 					bot.dead();
 					this.alive--;

@@ -195,7 +195,7 @@ public class BotActor extends HeroActor{
     }
 
     public boolean isOutOfBounds(float x, float y){
-        float p = 10f; //padding so body completely OOB
+        float p = 50f; //padding so body completely OOB
         return (this.body.getPosition().x > x + p) || (this.body.getPosition().x < -p)
                 || (this.body.getPosition().y > y + p) || (this.body.getPosition().y < -p);
     }

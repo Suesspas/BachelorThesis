@@ -44,7 +44,8 @@ public class GameStage extends Stage implements ContactListener {
     BitmapFont font = new BitmapFont();
     private static float physicsSpeedup = ConfigManager.getInstance().getPhysicsSpeedup(); //TODO move to config
     private static int levelTimer;
-    private static int maxLevelTimer;
+    private static int resetTimer;
+    private static int maxResetTimer;
 
     public GameStage(){
         super(new ExtendViewport(WorldMisc.minWorldWidth, WorldMisc.minWorldHeight, new OrthographicCamera(16f, 9f)));
@@ -95,7 +96,8 @@ public class GameStage extends Stage implements ContactListener {
                 }
                 setupPlatforms(platformCoords);
                 levelTimer = 0;
-                maxLevelTimer = (int) (500 / physicsSpeedup);
+                resetTimer = 0;
+                maxResetTimer = (int) (500 / physicsSpeedup);
                 break;
             case 2:
                 clearLevel();
@@ -105,7 +107,8 @@ public class GameStage extends Stage implements ContactListener {
                 }
                 setupPlatforms(platformCoords);
                 levelTimer = 0;
-                maxLevelTimer = (int) (900 / physicsSpeedup);
+                resetTimer = 0;
+                maxResetTimer = (int) (1200 / physicsSpeedup);
                 break;
             case 3:
                 clearLevel();
@@ -115,7 +118,8 @@ public class GameStage extends Stage implements ContactListener {
                 }
                 setupPlatforms(platformCoords);
                 levelTimer = 0;
-                maxLevelTimer = (int) (900 / physicsSpeedup);
+                resetTimer = 0;
+                maxResetTimer = (int) (900 / physicsSpeedup);
                 break;
             case 4:
                 break;
@@ -194,7 +198,7 @@ public class GameStage extends Stage implements ContactListener {
         }
         playerJumpTimer--;
 
-        evolutionaryAlgorithm.updatePopulation(platforms, goal, levelTimer);
+        evolutionaryAlgorithm.updatePopulation(platforms, goal, resetTimer);
 
         List<BotActor> deadBots = new ArrayList<>();
 
@@ -224,7 +228,7 @@ public class GameStage extends Stage implements ContactListener {
         }
 
 
-        if (evolutionaryAlgorithm.populationDead() || levelTimer % maxLevelTimer == maxLevelTimer-1) {//TODO change countdown timer for different levels
+        if (evolutionaryAlgorithm.populationDead() || resetTimer > maxResetTimer) {//TODO change countdown timer for different levels
             reset();
             for (BotActor b: bots) {
                 //WorldMisc.world.destroyBody(b.getBody());
@@ -233,6 +237,7 @@ public class GameStage extends Stage implements ContactListener {
             }
         }
         levelTimer++;
+        resetTimer++;
     }
 
     private void doPhysicsStep(float delta) {
@@ -309,6 +314,7 @@ public class GameStage extends Stage implements ContactListener {
             bot.setAirBorne();
             bot.setAlive();
         }
+        resetTimer = 0;
     }
 
     /*private void processCameraMovement(){
@@ -331,23 +337,23 @@ public class GameStage extends Stage implements ContactListener {
             BotActor bot = bots.get(getBotNumber(bodyA));
             PlatformUserData platformUserData = (PlatformUserData) bodyB.getUserData(); //TODO schauen ob conversion bei goalUserData funktioniert bei contact
             bot.updateHighestPlatform(platformUserData.getPlatformNumber());
-            bot.update(goal, levelTimer);
+            bot.update(goal, resetTimer);
         } else if (b.isSensor() && !BodyMisc.bodyIsCharacter(bodyA)) {
             landed(bodyB);
             BotActor bot = bots.get(getBotNumber(bodyB));
             PlatformUserData platformUserData = (PlatformUserData) bodyA.getUserData();
             bot.updateHighestPlatform(platformUserData.getPlatformNumber());
-            bot.update(goal, levelTimer);
+            bot.update(goal, resetTimer);
         }
         //Bot reaches goal
         if ((a.isSensor() && BodyMisc.bodyIsGoal(b.getBody()))){
             BotActor bot = bots.get(getBotNumber(bodyA));
             bot.reachedGoal();
-            bot.update(goal, levelTimer);
+            bot.update(goal, resetTimer);
         } else if (b.isSensor() && BodyMisc.bodyIsGoal(a.getBody())){
             BotActor bot = bots.get(getBotNumber(bodyB));
             bot.reachedGoal();
-            bot.update(goal, levelTimer);
+            bot.update(goal, resetTimer);
         }
     }
 
