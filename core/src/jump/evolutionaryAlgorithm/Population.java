@@ -49,18 +49,21 @@ public class Population {
 		} else {
 			throw new RuntimeException("no valid parent selection parameter");
 		}
-
 	}
 
 	private List<Genotype> rankingSelectNextGen(float mutationRate, float mutationRange, int childCount, float mutationStep,
 												List<Genotype> nextGeneration, boolean isUniform, String scoreEvaluation,
 												String crossoverType) {
-		int max = 1;
+		int maxParentIndex = 1;
+
 		outerloop:
 		while (true) {
-			for (int i = 0; i < max; i++) { //strenge eltern auswahl, keine Wahrscheinlichkeiten für crossover sondern reihenfolge der fitness
-				List<Genotype> children = Genotype.crossOver(this.genomes.get(i), this.genomes.get(max), childCount,
-						mutationRate, mutationRange, mutationStep, isUniform, scoreEvaluation, crossoverType);
+			for (int i = 0; i < maxParentIndex; i++) { //strenge eltern auswahl, keine Wahrscheinlichkeiten für crossover sondern reihenfolge der fitness
+				List<Genotype> parents = new ArrayList<>();
+				parents.add(this.genomes.get(i));
+				parents.add(this.genomes.get(maxParentIndex));
+				List<Genotype> children = Genotype.crossOver(parents, childCount, mutationRate, mutationRange,
+						mutationStep, isUniform, scoreEvaluation, crossoverType);
 				for (Genotype child: children) {
 					child.assignBodyNumber(nextGeneration.size());
 					nextGeneration.add(child);
@@ -69,8 +72,8 @@ public class Population {
 					}
 				}
 			}
-			max++;
-			max = max >= this.genomes.size() ? 0 : max;
+			maxParentIndex++;
+			maxParentIndex = maxParentIndex >= this.genomes.size() ? 0 : maxParentIndex;
 		}
 		return nextGeneration;
 	}
@@ -81,7 +84,7 @@ public class Population {
 		outerloop:
 		while (true){
 			List<Genotype> parents = randomParentSelection();
-			List<Genotype> children = Genotype.crossOver(parents.get(0), parents.get(1), childCount, mutationRate,
+			List<Genotype> children = Genotype.crossOver(parents, childCount, mutationRate,
 					mutationRange, mutationStep, isUniform, scoreEvaluation, crossoverType);
 			for (Genotype child: children) {
 				child.assignBodyNumber(nextGeneration.size());
@@ -130,22 +133,22 @@ public class Population {
 
 	public void fitnessEvaluation(String fitnessCalculation) {
 		if (fitnessCalculation.equals("weightedSum")){
-			this.weightedSumFitnessDistribution();
+			this.normalizeFitnessDistribution();
 		} else if (fitnessCalculation.equals("other")){
-			//other fitness calc
+			//optional: setting fitness to Math.pow(fitness,2);
 		} else {
 			throw new RuntimeException("no valid fitness calc argument");
 		}
 		this.sortByFitness();
 	}
 
-	private void weightedSumFitnessDistribution() {
+	private void normalizeFitnessDistribution() {
 		float sum = 0f;
 		for (Genotype genome: this.genomes) {
 			sum += genome.getBot().getScore();
 		}
 		for (Genotype genome: this.genomes) {
-			genome.setFitness(genome.getBot().getScore() / sum); //optional: setting fitness to Math.pow(fitness,2);
+			genome.setFitness(genome.getBot().getScore() / sum);
 		}
 	}
 	

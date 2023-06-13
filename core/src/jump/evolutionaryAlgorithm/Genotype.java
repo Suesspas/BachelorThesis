@@ -40,6 +40,7 @@ public class Genotype {
 		this(genome.getBot().getNeuralNetwork().flatten(), botNumber, scoreEvaluation);
 	}
 
+	/*
 	public static List<Genotype> crossOver(Genotype geneA, Genotype geneB, int childCount, float mutationRate, float mutationRange,
 										   float mutationStep, boolean isUniform, String scoreEvaluation, String crossoverType) {
 		List<Genotype> children = new ArrayList<Genotype>();
@@ -70,7 +71,57 @@ public class Genotype {
 			children.add(new Genotype(childNet, 0, scoreEvaluation)); //default bot number 0, is set after method call
 		}
 		return children;
+	}*/
+	public static List<Genotype> crossOver(List<Genotype> parents, int childCount, float mutationRate, float mutationRange,
+										   float mutationStep, boolean isUniform, String scoreEvaluation, String crossoverType) {
+		List<Genotype> children = new ArrayList<Genotype>();
+
+		List<NeuralNetwork.FlattenNetwork> parentNets = new ArrayList<>();
+		for (Genotype parent : parents) {
+			parentNets.add(parent.bot.getNeuralNetwork().flatten());
+		}
+
+		for (int ch = 0; ch < childCount; ch++) {
+			NeuralNetwork.FlattenNetwork childNet = parentNets.get(0);
+
+			if (crossoverType.equals("discrete")) { // discrete crossover with 50/50 chance for genes of either parent
+				for (int i = 0; i < childNet.weights.size(); i++) {
+					int randomIndex = (int) (Math.random() * parentNets.size());
+					float newWeight = parentNets.get(randomIndex).weights.get(i);
+					childNet.weights.set(i, newWeight);
+				}
+			} else if (crossoverType.equals("arithmetic")) { // arithmetic crossover with average value of genes
+				for (int i = 0; i < childNet.weights.size(); i++) {
+					childNet.weights.set(i, getWeightAverage(parentNets, i));
+				}
+			} else if (!crossoverType.equals("none")) {
+				throw new RuntimeException("Invalid crossover type parameter");
+			}
+
+			if (isUniform) {
+				uniformMutation(mutationRate, mutationRange, childNet);
+			} else {
+				nonuniformMutation(mutationRate, mutationRange, mutationStep, childNet);
+			}
+			children.add(new Genotype(childNet, 0, scoreEvaluation)); // default bot number 0, is set after method call
+		}
+		return children;
 	}
+
+	public static float getWeightAverage(List<NeuralNetwork.FlattenNetwork> parents, int index) {
+		if (parents == null || parents.isEmpty()) {
+			throw new RuntimeException("parents empty"); // Handle empty list case or return an appropriate default value
+		}
+
+		float sum = 0.0f;
+		for (NeuralNetwork.FlattenNetwork parent:
+			 parents) {
+			sum += parent.weights.get(index);
+		}
+		return sum / parents.size();
+	}
+
+
 
 	private static void nonuniformMutation(float mutationRate, float mutationRange, float mutationStep, NeuralNetwork.FlattenNetwork childNet) {
 		Random random = new Random();
