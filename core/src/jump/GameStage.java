@@ -90,36 +90,36 @@ public class GameStage extends Stage implements ContactListener {
         switch (levelNumber){
             case 1:
                 clearLevel();
-                setupGoal(70F, 30F, 8F, 2F);
                 for (int i = 0; i < 4; i++){
                     platformCoords.add(new Vector2(8.0F + 15*i, 0.0F + 7*i));
                 }
                 setupPlatforms(platformCoords);
+                setupGoal(70F, 30F, 8F, 2F);
                 levelTimer = 0;
                 resetTimer = 0;
-                maxResetTimer = (int) (500 / physicsSpeedup);
+                maxResetTimer = (int) (700 / physicsSpeedup);
                 break;
             case 2:
                 clearLevel();
-                setupGoal(130F, 55F, 8F, 2F);
                 for (int i = 0; i < 8; i++){
                     platformCoords.add(new Vector2(8.0F + 15*i, 0.0F + 7*i));
                 }
                 setupPlatforms(platformCoords);
+                setupGoal(130F, 55F, 8F, 2F);
                 levelTimer = 0;
                 resetTimer = 0;
                 maxResetTimer = (int) (1200 / physicsSpeedup);
                 break;
             case 3:
                 clearLevel();
-                setupGoal(10F, 55F, 8F, 2F);
                 for (int i = 0; i < 8; i++){
                     platformCoords.add(new Vector2(i > 4? 68.0F - 15*(i-4) : 8.0F + 15*i, 0.0F + 7*i));
                 }
                 setupPlatforms(platformCoords);
+                setupGoal(10F, 55F, 8F, 2F);
                 levelTimer = 0;
                 resetTimer = 0;
-                maxResetTimer = (int) (900 / physicsSpeedup);
+                maxResetTimer = (int) (2000 / physicsSpeedup);
                 break;
             case 4:
                 break;
@@ -138,7 +138,10 @@ public class GameStage extends Stage implements ContactListener {
     }
 
     private void setupGoal(float x, float y, float hx, float hy){
-        goal = new GoalActor(WorldMisc.createGoal(new Vector2(x, y), hx, hy));
+        Body goalHitbox = WorldMisc.createGoal(new Vector2(x, y), hx, hy);
+        goal = new GoalActor(goalHitbox);
+        PlatformActor goalActor = new PlatformActor(goalHitbox);
+        platforms.add(goalActor);
         addActor(goal);
     }
 
@@ -262,6 +265,7 @@ public class GameStage extends Stage implements ContactListener {
         batch.setProjectionMatrix(camera.combined);
         generationStr = "Generation " + evolutionaryAlgorithm.generation;
         topScoreStr = "Top score: " + evolutionaryAlgorithm.getBestScore();
+        // topScoreStr = "Top score: " + String.format("%.3f", evolutionaryAlgorithm.getBestScore());
         botsAliveStr = "Bots alive: "+ bots.size();
         bestBotScore = Math.max(evolutionaryAlgorithm.getBestScore(), bestBotScore) ;
 
@@ -271,8 +275,8 @@ public class GameStage extends Stage implements ContactListener {
         font.draw(batch, generationStr, getWidth()/3, getHeight()-3);
         font.draw(batch, botsAliveStr, 2*getWidth()/3, getHeight()-3);
         font.draw(batch, topScoreStr, 1, getHeight()-15);
-        font.draw(batch, "Best Fitness so far:" + bestBotScore, 1, getHeight()-30);
-
+        font.draw(batch, "Best score so far: " + bestBotScore, 1, getHeight()-23);
+        //font.draw(batch, "Best score so far: " + String.format("%.3f", bestBotScore), 1, getHeight()-23);
         batch.end();
 
         //camera.update();
@@ -296,7 +300,7 @@ public class GameStage extends Stage implements ContactListener {
             ConfigManager.getInstance().updateConfigProps();
             setupEA(false);
         } else {
-            evolutionaryAlgorithm.evolvePopulation(); //TODO test
+            evolutionaryAlgorithm.evolvePopulation();
         }
         List<Genotype> genomes = evolutionaryAlgorithm.population.genomes;
         for (int i = 0; i < genomes.size(); i++) {
@@ -305,7 +309,7 @@ public class GameStage extends Stage implements ContactListener {
                 bots.set(i, bot);
                 //bot.getUserData().setBotNumber(i);
                 WorldMisc.setBotUserData(bot.getBody(), i);
-                addActor(bot); //maybe can be removed?
+                addActor(bot);
             } else {
                 bots.add(bot);
                 WorldMisc.setBotUserData(bot.getBody(), bots.size()-1);

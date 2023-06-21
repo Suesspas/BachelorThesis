@@ -69,6 +69,9 @@ public class BotActor extends HeroActor{
     private float scoreCalc(GoalActor goal, int aliveTime) { //TODO alivetime sinvoll? + fitness value tuning
         if (this.scoreEvaluation.equals("std")){
             float goalDistScore = (reachedGoal ? 1000 : 100) / (1 + distanceTo(goal.body.getPosition()));
+//            if (goalDistScore > 5){
+//                System.out.println("goal dist score: " + goalDistScore + ", alive time: " + aliveTime);
+//            }
             return goalDistScore + Math.min(highestPlatformReached, 10); //encourage reaching new platforms to a certain degree (only first x platforms reached)
 
         } else if (this.scoreEvaluation.equals("nogoal")){
