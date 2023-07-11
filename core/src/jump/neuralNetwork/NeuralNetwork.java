@@ -35,6 +35,19 @@ public class NeuralNetwork {
 			this.weights = new LinkedList<Float>();
 		}
 
+		public FlattenNetwork(int[] topology, float[] weights) {
+			this.neurons = new LinkedList<Integer>();
+			this.weights = new LinkedList<Float>();
+			for (int layerSize:
+					topology) {
+				this.neurons.add(layerSize);
+			}
+			for (float weight:
+				 weights) {
+				this.weights.add(weight);
+			}
+		}
+
 		@Override
 		public String toString() {
 			return neurons.toString() + "*" + weights.toString();

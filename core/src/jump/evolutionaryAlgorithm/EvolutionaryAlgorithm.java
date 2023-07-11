@@ -118,13 +118,17 @@ public class EvolutionaryAlgorithm {
 		}
 	}
 
-
+	boolean is_test = false;
 	public void evolvePopulation() {
 		this.alive = this.populationSize;
 		this.population.fitnessEvaluation(this.fitnessCalculation);
 		DatabaseConnector.saveGeneration(this.population, this.generation, this.runID); //here because fitness is calculated before
-		this.population.evolve(this.elitism, this.randomness, this.mutationRate, this.mutationRange, this.childCount,
-				this.mutationStep, this.isUniform, this.parentSelection, this.crossoverType, this.scoreEvaluation);
+		if (is_test){
+			this.population.test_evo(this.scoreEvaluation);
+		} else {
+			this.population.evolve(this.elitism, this.randomness, this.mutationRate, this.mutationRange, this.childCount,
+					this.mutationStep, this.isUniform, this.parentSelection, this.crossoverType, this.scoreEvaluation);
+		}
 		this.bestGenome = this.population.genomes.get(0).getBot().getNeuralNetwork();
 		this.generation++;
 	}

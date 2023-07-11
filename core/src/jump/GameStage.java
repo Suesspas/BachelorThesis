@@ -214,7 +214,7 @@ public class GameStage extends Stage implements ContactListener {
     public void act(float delta) {
 
         super.act(delta * physicsSpeedup); //* physicsSpeedup ?
-        doPhysicsStep(delta * physicsSpeedup);
+        _doPhysicsStep(delta * physicsSpeedup);
 
         //Player Movement
         if (left) {
@@ -252,7 +252,10 @@ public class GameStage extends Stage implements ContactListener {
 //            userData.setBotNumber(-1);
                 //WorldMisc.world.destroyBody(b.getBody()); //TODO reuse bodies
                 //b.getBody().setActive(false);
-                b.getBody().setAwake(false);
+                Body botbody = b.getBody();
+                HeroUserData userData = (HeroUserData) botbody.getUserData();
+                userData.setBotNumber(-1);
+                botbody.setAwake(false);
                 b.setAirBorne();
             }
             //update bot numbers
@@ -283,11 +286,25 @@ public class GameStage extends Stage implements ContactListener {
     private void doPhysicsStep(float delta) {
         float frameTime = Math.min(delta, 0.05f); //before 0.25f
         accumulator += frameTime;
+//        WorldMisc.world.step(frameTime, 6, 2);
         while (accumulator >= frameTime) {
             WorldMisc.world.step(TIME_STEP, 6, 2); //TODO iterations were 8/4, but less may yield better perf
             accumulator -= TIME_STEP;
+//            evolutionaryAlgorithm.updatePopulation(platforms, goal, resetTimer);
         }
     }
+
+    private void _doPhysicsStep(float delta) {
+        float frameTime = Math.min(delta, 0.05f); //before 0.25f
+        accumulator += delta;
+        WorldMisc.world.step(TIME_STEP * physicsSpeedup * 5, 6, 2);
+//        while (accumulator >= TIME_STEP) {
+//            WorldMisc.world.step(TIME_STEP, 6, 2);
+//            accumulator -= TIME_STEP;
+//            evolutionaryAlgorithm.updatePopulation(platforms, goal, resetTimer);
+//        }
+    }
+
 
     String generationStr; //TODO
     String topScoreStr;

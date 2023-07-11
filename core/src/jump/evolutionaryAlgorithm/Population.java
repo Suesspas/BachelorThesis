@@ -17,6 +17,32 @@ public class Population {
 		}
 	}
 
+	float[] test_weights = {-0.36999577f, 0.5912553f, -0.38558292f, -0.2923496f, -0.86852086f, 0.22749999f, -0.59749264f,
+			-0.5411294f, -0.1251007f, -0.4497448f, -0.24147299f, 0.51523507f, -0.64274216f, 1.0f, -0.45589453f, 0.6580526f,
+			-0.20450091f, -0.31741446f, 0.59916925f, -0.26905316f, 0.48049366f, 0.22023061f, 0.23711222f, 0.4307496f, -0.35066372f,
+			-0.371162f, -0.42370203f, -0.006182039f, 0.3305713f, -0.20873228f, 0.3424438f, 0.27037615f, -0.07614395f, 0.090668716f,
+			-0.21384272f, -0.14446539f, 0.6175434f, 0.6197422f, -0.1170483f, 0.26054934f, -0.48601618f, -0.022899806f, -0.3236448f,
+			0.3172856f, 0.0014907718f, 0.15254347f, 0.56482905f, -0.1381852f, -0.020256035f, -0.50991035f};
+	int[] test_topology = {7,5,3};
+	public void test_evo (String scoreEvaluation){
+		List<Genotype> nextGeneration = new ArrayList<Genotype>();
+		for (int i = 0; i < genomes.size(); i++) {
+			NeuralNetwork nn  = new NeuralNetwork(test_topology);
+			NeuralNetwork.FlattenNetwork net  = nn.flatten();//TODO check
+			if (i > 0 && i < 50){
+				for (int j = 0; j < net.weights.size(); j++) {
+					net.weights.set(j, test_weights[j]);
+				}
+			} else {
+				for (int j = 1; j < net.weights.size(); j++) {
+					net.weights.set(j, (float) (Math.random()*2 - 1));
+				}
+			}
+			nextGeneration.add(new Genotype(net, nextGeneration.size(), scoreEvaluation));
+		}
+		this.genomes = nextGeneration;
+	}
+
 	public void evolve(float elitism, float randomness, float mutationRate, float mutationRange, int childCount,
 					   float mutationStep, boolean isUniform, String parentSelection, String crossoverType, String scoreEvaluation) {
 		/*System.out.println("top fitness: " + genomes.get(0).getFitness()
