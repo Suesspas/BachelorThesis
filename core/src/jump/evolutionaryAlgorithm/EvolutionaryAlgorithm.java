@@ -89,7 +89,7 @@ public class EvolutionaryAlgorithm {
 			if (bot.isAlive()) {
 				PlatformActor closestPlatform = getClosestPlatform(platforms, bot);
 
-				List<PlatformActor> platformsByDist = getXClosestPlatforms(3, platforms, bot); //TODO feed2, x init
+				List<PlatformActor> platformsByDist = _getXClosestPlatforms(3, platforms, bot); //TODO feed2, x init
 //				List<Float> sortedPlatformDistances = new ArrayList<>();
 //				for (PlatformActor platform : platforms) {
 //					sortedPlatformDistances.add(bot.distanceTo(platform.getPosition()));
@@ -171,7 +171,7 @@ public class EvolutionaryAlgorithm {
 		return closestPlatform;
 	}
 
-	private List<PlatformActor> _getXClosestPlatforms(int x, List<PlatformActor> platforms, BotActor bot) {
+	private List<PlatformActor> __getXClosestPlatforms(int x, List<PlatformActor> platforms, BotActor bot) {
 		if (x >= platforms.size()){
 			x = platforms.size();
 			System.err.println("Only " + platforms.size() + " platforms in level");
@@ -189,21 +189,31 @@ public class EvolutionaryAlgorithm {
 		return platformsByDist;
 	}
 
-	private PriorityQueue<PlatformActor> platformQueue;
-	private List<PlatformActor> platformsByDist;
 
-	private List<PlatformActor> getXClosestPlatforms(int x, List<PlatformActor> platforms, BotActor bot) {
-		if (platformQueue == null) {
-			platformQueue = new PriorityQueue<>(x, new Comparator<PlatformActor>() {
-				@Override
-				public int compare(PlatformActor p1, PlatformActor p2) {
-					return Double.compare(bot.distanceTo(p1.getPosition()), bot.distanceTo(p2.getPosition()));
-				}
-			});
-		} else {
-			platformQueue.clear();
+	private List<PlatformActor> platformsByDist= new ArrayList<>();
+
+	private List<PlatformActor> _getXClosestPlatforms(int x, List<PlatformActor> platforms, BotActor bot) {
+		PriorityQueue<PlatformActor> platformQueue= new PriorityQueue<>(x,
+				Comparator.comparingDouble(p -> bot.distanceTo(p.getPosition())));
+		for (PlatformActor platform : platforms) {
+			double distance = bot.distanceTo(platform.getPosition());
+			platformQueue.offer(platform);
 		}
 
+		if (platformsByDist == null) {
+			platformsByDist = new ArrayList<>(x);
+		} else {
+			platformsByDist.clear();
+		}
+		for (int i = 0; i < x; i++) {
+			platformsByDist.add(i, platformQueue.remove());
+		}
+		return platformsByDist;
+	}
+
+	private List<PlatformActor> getXClosestPlatforms(int x, List<PlatformActor> platforms, BotActor bot) {
+		PriorityQueue<PlatformActor> platformQueue= new PriorityQueue<>(x,
+				Comparator.comparingDouble(p -> bot.distanceTo(p.getPosition())));
 		for (PlatformActor platform : platforms) {
 			double distance = bot.distanceTo(platform.getPosition());
 			if (platformQueue.size() < x || distance < bot.distanceTo(platformQueue.peek().getPosition())) {
