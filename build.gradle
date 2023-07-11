@@ -7,6 +7,7 @@ buildscript {
         gradlePluginPortal()
         maven { url "https://oss.sonatype.org/content/repositories/snapshots/"}
 //        maven{ url "https://mvnrepository.com/artifact/org.jooq/jooq-codegen/"}
+        maven {url "https://mvnrepository.com/artifact/colt/colt/1.2.0"}
         google()
     }
     dependencies {
@@ -27,6 +28,9 @@ plugins {
 }
 dependencies {
     jooqGenerator 'org.xerial:sqlite-jdbc:3.36.0'
+    //implementation 'cern.colt:colt:1.2.0'
+    //implementation group: 'colt', name: 'colt', version: '1.2.0'"
+
 }
 jooq {
     version = '3.18.3'  // the default (can be omitted)
@@ -121,6 +125,11 @@ allprojects {
         gdxControllersVersion = '2.2.1'
     }
 
+    dependencies {
+        //implementation 'cern.colt:colt:1.2.0'
+        //implementation group: 'colt', name: 'colt', version: '1.2.0'
+    }
+
     repositories {
         mavenLocal()
         mavenCentral()
@@ -184,5 +193,6 @@ project(":core") {
         implementation group: 'org.jooq', name: 'jooq', version: '3.18.3'
         implementation group: 'org.jooq', name: 'jooq-meta', version: '3.18.3'
         implementation group: 'org.jooq', name: 'jooq-codegen', version: '3.18.3'
+        implementation 'colt:colt:1.2.0'
     }
 }

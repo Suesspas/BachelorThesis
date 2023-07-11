@@ -1,5 +1,7 @@
 package jump.evolutionaryAlgorithm;
 
+import jump.ConfigManager;
+import jump.RandomGen;
 import jump.actors.BotActor;
 import jump.neuralNetwork.NeuralNetwork;
 
@@ -60,7 +62,11 @@ public class Population {
 		for (int i = 0; i < randomCount; i++) {
 			NeuralNetwork.FlattenNetwork net  = this.genomes.get(0).getBot().getNeuralNetwork().flatten();
 			for (int j = 1; j < net.weights.size(); j++) {
-				net.weights.set(j, (float) (Math.random()*2 - 1));
+				if (ConfigManager.getInstance().isNewRandom()){
+					net.weights.set(j, (float) (RandomGen.nextFloat()*2 - 1));
+				}else {
+					net.weights.set(j, (float) (Math.random()*2 - 1));
+				}
 			}
 			nextGeneration.add(new Genotype(net, nextGeneration.size(), scoreEvaluation));
 		}
@@ -124,8 +130,16 @@ public class Population {
 	}
 
 	private List<Genotype> randomParentSelection() {//roulette wheel selection as Eiben.2015 ch 5.2.3 explains --> fitness proportional
-		double rand1 = Math.random();
-		double rand2 = Math.random();
+		float rand1;
+		float rand2;
+		if (ConfigManager.getInstance().isNewRandom()){
+			rand1 = RandomGen.nextFloat();
+			rand2 = RandomGen.nextFloat();
+		} else {
+			rand1 = (float) Math.random();
+			rand2 = (float) Math.random();
+		}
+
 		Genotype parent1 = null;
 		Genotype parent2 = null;
 		boolean parent1Set = false;

@@ -1,5 +1,7 @@
 package jump.evolutionaryAlgorithm;
 
+import jump.ConfigManager;
+import jump.RandomGen;
 import jump.actors.BotActor;
 import jump.neuralNetwork.NeuralNetwork;
 
@@ -86,7 +88,12 @@ public class Genotype {
 
 			if (crossoverType.equals("discrete")) { // discrete crossover with 50/50 chance for genes of either parent
 				for (int i = 0; i < childNet.weights.size(); i++) {
-					int randomIndex = (int) (Math.random() * parentNets.size());
+					int randomIndex;
+					if (ConfigManager.getInstance().isNewRandom()){
+						randomIndex = (int) (RandomGen.nextFloat() * parentNets.size());
+					} else {
+						randomIndex = (int) (Math.random() * parentNets.size());
+					}
 					float newWeight = parentNets.get(randomIndex).weights.get(i);
 					childNet.weights.set(i, newWeight);
 				}
@@ -126,9 +133,15 @@ public class Genotype {
 	private static void nonuniformMutation(float mutationRate, float mutationRange, float mutationStep, NeuralNetwork.FlattenNetwork childNet) {
 		Random random = new Random();
 		for (int i = 0; i < childNet.weights.size(); i++) {
-			if (Math.random() <= mutationRate) {
+			float randMutation = ConfigManager.getInstance().isNewRandom() ? RandomGen.nextFloat() : (float) Math.random();
+			if (randMutation <= mutationRate) {
 				float currentValue = childNet.weights.get(i);
-				float randomValue = (float) random.nextGaussian() * mutationStep;
+				float randomValue;
+				if ( ConfigManager.getInstance().isNewRandom()){
+					randomValue = (float) RandomGen.nextGaussian() * mutationStep;
+				} else {
+					randomValue = (float) random.nextGaussian() * mutationStep;
+				}
 				float newValue = currentValue + randomValue;
 				newValue = Math.max(-mutationRange, Math.min(mutationRange, newValue));
 				childNet.weights.set(i, newValue);
@@ -138,7 +151,8 @@ public class Genotype {
 
 	private static void uniformMutation(float mutationRate, float mutationRange, NeuralNetwork.FlattenNetwork childNet) {
 		for (int i = 0; i < childNet.weights.size(); i++) {
-			if (Math.random() <= mutationRate) {
+			float randMutation = ConfigManager.getInstance().isNewRandom() ? RandomGen.nextFloat() : (float) Math.random();
+			if (randMutation <= mutationRate) {
 				childNet.weights.set(i, (float) Math.random()*2* mutationRange - mutationRange); //TODO schauen, ob der Wertebereich sinvoll ist
 			}
 		}

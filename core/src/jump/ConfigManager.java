@@ -17,6 +17,7 @@ public class ConfigManager {
     private int currentNNconf;
     private int currentLevel;
     private int maxGen;
+    private boolean newRandom;
 
     private ConfigManager() {
         try {
@@ -28,6 +29,7 @@ public class ConfigManager {
             levels = parseIntegerArray(properties.getProperty("level"));
             physicsSpeedup = Float.parseFloat(properties.getProperty("physics.speedup"));
             maxGen = Integer.parseInt(properties.getProperty("maxGen"));
+            newRandom = Boolean.parseBoolean(properties.getProperty("new.random"));
             counter = 0;
             currentEAconf = EAconfs[counter];
             currentNNconf = NNconfs[counter];
@@ -113,6 +115,9 @@ public class ConfigManager {
         FileOutputStream output = new FileOutputStream("config.properties");
         properties.store(output, "Modified properties");
         output.close();
+    }
+    public boolean isNewRandom() {
+        return newRandom;
     }
 }
 
