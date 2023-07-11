@@ -20,12 +20,20 @@ public abstract class WorldMisc {
 
     public static int level = ConfigManager.getInstance().getCurrentLevel();
     public static List<Body> botBodies = new ArrayList<Body>();
-    public static final Vector2 spawnCoords = new Vector2(8f,5f);
+    public static Vector2 spawnCoords = new Vector2(8f,5f);
 
     public static void createWorld() {
 
 //            System.out.println(MAXDIST);
         world = new World(new Vector2(0, -10), true);
+    }
+
+    public static void updateSpawnCoords(int level){
+        if (level == 5){
+            spawnCoords = new Vector2(minWorldWidth - 20,  minWorldHeight - 20);
+        } else {
+            spawnCoords = new Vector2(8f,5f);
+        }
     }
 
     public static Body createGoal(Vector2 pos, float hx, float hy) {

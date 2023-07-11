@@ -87,6 +87,8 @@ public class GameStage extends Stage implements ContactListener {
 
     private void setupLevel(int levelNumber){//TODO set up levels 4+
         List<Vector2> platformCoords = new ArrayList<>();
+        WorldMisc.updateSpawnCoords(levelNumber);
+        int platformCount;
         switch (levelNumber){
             case 1:
                 clearLevel();
@@ -122,8 +124,37 @@ public class GameStage extends Stage implements ContactListener {
                 maxResetTimer = (int) (2000 / physicsSpeedup);
                 break;
             case 4:
+                clearLevel();
+                platformCount = 8;
+                float[][] offset = {{0f,5f,10f,15f,20f,30f,40f,50f},
+                        {0f,0f,0f,0f,0f,0f,0f,0f}};
+                for (int i = 0; i < platformCount; i++){
+                    platformCoords.add(new Vector2((8.0F * (i + 1)) + offset[0][i], 0.0F));
+                }
+
+                setupPlatforms(platformCoords);
+                setupGoal(135F, 0F, 8F, 2F);
+                levelTimer = 0;
+                resetTimer = 0;
+                maxResetTimer = (int) (1800 / physicsSpeedup);
                 break;
             case 5:
+                clearLevel();
+                platformCount = 12;
+                for (int i = 0; i < platformCount; i++){
+                    platformCoords.add(new Vector2(WorldMisc.spawnCoords.x - 10 * i,
+                            WorldMisc.spawnCoords.y - 20));
+                }
+
+                for (int i = 0; i < 4; i++){
+                    platformCoords.add(new Vector2(8.0F + 15*i, 0.0F + 7*i));
+                }
+
+                setupPlatforms(platformCoords);
+                setupGoal(70F, 30F, 8F, 2F);
+                levelTimer = 0;
+                resetTimer = 0;
+                maxResetTimer = (int) (3000 / physicsSpeedup);
                 break;
             default: return;
         }
@@ -177,6 +208,7 @@ public class GameStage extends Stage implements ContactListener {
     private void setupRightWall(){
         rightWall = wrl.createRightWall(world);
     }*/
+    boolean resetDone = false;
 
     @Override
     public void act(float delta) {
@@ -230,9 +262,14 @@ public class GameStage extends Stage implements ContactListener {
             }
         }
 
+        if (resetDone) {
+            System.out.println(levelTimer + " delta: " + delta);
+            resetDone = false;
+        }
 
         if (evolutionaryAlgorithm.populationDead() || resetTimer > maxResetTimer) {//TODO change countdown timer for different levels
             reset();
+            resetDone = true;
             for (BotActor b: bots) {
                 //WorldMisc.world.destroyBody(b.getBody());
                 //b.getBody().setActive(false);
