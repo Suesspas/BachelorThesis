@@ -8,3 +8,5 @@ Chair of Algorithms for Intelligent Systems
 
 This platform game serves as a test bed for simulating neuroevolution in a physics-based environment. 
 It is coded in Java with the use of the [LibGDX](https://github.com/libgdx/libgdx/) library.
+
+![runstats](https://github.com/Suesspas/BachelorThesis/raw/master/assets/runs_stats.png)
